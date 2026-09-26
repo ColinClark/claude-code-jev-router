@@ -203,3 +203,56 @@ def test_calls_attributed_to_session_start_project(tmp_path):
     report = usage.build_report(Policy.load(), 24, now=NOW, root=root, ledger=tmp_path / "l.jsonl")
     assert list(report["by_project"]) == ["/srv/app"]
     assert report["by_project"]["/srv/app"]["requests"] == 2
+
+
+def with_content(record, text):
+    record["message"]["content"] = [{"type": "text", "text": text}]
+    return record
+
+
+def test_output_reconciled_with_cost_state(tmp_path):
+    root = tmp_path / "projects"
+    proj = root / "-p"
+    write_jsonl(
+        proj / "s1.jsonl",
+        [
+            with_content(assistant("m1", "claude-opus-5-5", NOW - HOUR, output=3, cwd="/srv/app"), "x" * 100),
+            {
+                "type": "cost-state",
+                "sessionId": "s1",
+                "startTime": (NOW - 2 * HOUR) * 1000,
+                "modelUsage": {"claude-opus-5-5": {"outputTokens": 4000}},
+            },
+        ],
+    )
+    sub = proj / "s1" / "subagents"
+    worker = with_content(assistant("w1", "claude-opus-5-5", NOW - HOUR, output=2), "y" * 300)
+    write_jsonl(sub / "agent-a.jsonl", [worker])
+    (sub / "agent-a.meta.json").write_text(json.dumps({"agentType": "implement-medium"}))
+    report = usage.build_report(Policy.load(), 24, now=NOW, root=root, ledger=tmp_path / "l.jsonl")
+    assert report["totals"]["output_tokens"] == 4000
+    assert report["totals"]["output_basis"] == {"reconciled": 2}
+    assert report["by_agent"]["implement-medium"]["output_tokens"] == 3000  # 300 of 400 content chars
+    assert report["by_agent"][usage.MAIN]["output_tokens"] == 1000
+
+
+def test_output_estimated_when_snapshot_is_stale_or_missing(tmp_path):
+    root = tmp_path / "projects"
+    write_jsonl(
+        root / "-p" / "s1.jsonl",
+        [
+            {
+                "type": "cost-state",
+                "sessionId": "s1",
+                "startTime": (NOW - 2 * HOUR) * 1000,
+                "modelUsage": {"claude-opus-5-5": {"outputTokens": 999999}},
+            },
+            # Activity after the snapshot: it no longer covers the session, so it must not be used.
+            with_content(assistant("m1", "claude-opus-5-5", NOW - HOUR, output=3, cwd="/srv/app"), "x" * 250),
+            with_content(assistant("m2", "claude-opus-5-5", NOW - HOUR, output=500, cwd="/srv/app"), "x" * 25),
+        ],
+    )
+    report = usage.build_report(Policy.load(), 24, now=NOW, root=root, ledger=tmp_path / "l.jsonl")
+    assert report["totals"]["output_tokens"] == 100 + 500  # 250 chars / 2.5; recorded 500 beats estimate 10
+    assert report["totals"]["output_basis"] == {"estimated": 1, "recorded": 1}
+    assert "Output tokens:" in usage.render(report)

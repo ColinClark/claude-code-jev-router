@@ -29,6 +29,8 @@ from . import retention
 from .policy import Policy
 
 MAIN = "main session"
+# Generated code and JSON tool input average roughly 2.3-2.5 characters per token.
+CHARS_PER_OUTPUT_TOKEN = 2.5
 DATE_SUFFIX = re.compile(r"-\d{8}$")
 PRICING_NOTE = "API-equivalent estimate from policy.json pricing; not your actual bill on a subscription plan."
 
@@ -47,11 +49,15 @@ class Call:
     cache_write_5m: int = 0
     cache_write_1h: int = 0
     cache_read: int = 0
+    content_chars: int = 0  # characters of text and tool input the model generated for this request
+    output_basis: str = "recorded"  # recorded | estimated | reconciled
 
     def merge(self, other: Call) -> None:
-        # A request is written once per content block with growing counts; keep the final (max) values.
+        # A request is written once per content block, with growing counts: keep the max of the usage fields
+        # and add up the content, since each line carries only its own block.
         for name in ("input", "output", "cache_write_5m", "cache_write_1h", "cache_read"):
             setattr(self, name, max(getattr(self, name), getattr(other, name)))
+        self.content_chars += other.content_chars
 
 
 @dataclass
@@ -66,8 +72,10 @@ class Bucket:
     efforts: Counter = field(default_factory=Counter)
     models: Counter = field(default_factory=Counter)
     runs: set = field(default_factory=set)
+    output_basis: Counter = field(default_factory=Counter)
 
     def add(self, call: Call, cost: float | None) -> None:
+        self.output_basis[call.output_basis] += 1
         self.requests += 1
         self.input += call.input
         self.output += call.output
@@ -93,6 +101,7 @@ class Bucket:
             "unpriced_requests": self.unpriced,
             "models": dict(self.models.most_common()),
             "efforts": dict(self.efforts.most_common()),
+            "output_basis": dict(self.output_basis.most_common()),
         }
 
 
@@ -133,14 +142,52 @@ def transcript_files(root: Path, since: float) -> list[tuple[Path, str]]:
     return out
 
 
-def read_calls(path: Path, agent: str, since: float, until: float) -> dict[str, Call]:
+@dataclass
+class SessionTotals:
+    """Claude Code's own cumulative per-model totals for a session (the transcript's `cost-state` record)."""
+
+    start: float
+    complete: bool  # True when the snapshot was written after the session's last recorded request
+    output_by_model: dict[str, int]
+
+
+def _content_chars(msg: dict) -> int:
+    chars = 0
+    for block in msg.get("content") or []:
+        if not isinstance(block, dict):
+            continue
+        if block.get("type") == "text":
+            chars += len(block.get("text") or "")
+        elif block.get("type") == "tool_use":
+            chars += len(json.dumps(block.get("input") or {}))
+        elif block.get("type") == "thinking":
+            chars += len(block.get("thinking") or "")
+    return chars
+
+
+def read_calls(path: Path, agent: str, since: float, until: float) -> tuple[dict[str, Call], SessionTotals | None]:
     calls: dict[str, Call] = {}
+    totals: SessionTotals | None = None
     try:
         fh = path.open(encoding="utf-8", errors="replace")
     except OSError:
-        return calls
+        return calls, None
     with fh:
         for line in fh:
+            if '"cost-state"' in line:
+                try:
+                    rec = json.loads(line)
+                    if rec.get("type") == "cost-state":
+                        totals = SessionTotals(
+                            start=float(rec.get("startTime") or 0) / 1000,
+                            complete=True,
+                            output_by_model={
+                                m: int(u.get("outputTokens") or 0) for m, u in (rec.get("modelUsage") or {}).items()
+                            },
+                        )
+                except (ValueError, TypeError, AttributeError):
+                    pass
+                continue
             if '"assistant"' not in line or '"usage"' not in line:
                 continue  # cheap pre-filter before parsing
             try:
@@ -149,6 +196,8 @@ def read_calls(path: Path, agent: str, since: float, until: float) -> dict[str, 
                 continue
             if rec.get("type") != "assistant":
                 continue
+            if totals is not None:
+                totals.complete = False  # activity after the snapshot: it no longer covers the whole session
             msg = rec.get("message") or {}
             model, usage = msg.get("model"), msg.get("usage")
             if not model or model.startswith("<") or not isinstance(usage, dict):
@@ -174,13 +223,41 @@ def read_calls(path: Path, agent: str, since: float, until: float) -> dict[str, 
                 cache_write_5m=max(w5, 0),
                 cache_write_1h=w1h,
                 cache_read=usage.get("cache_read_input_tokens") or 0,
+                content_chars=_content_chars(msg),
             )
             key = rec.get("requestId") or msg.get("id") or rec.get("uuid") or f"{path}:{len(calls)}"
             if key in calls:
                 calls[key].merge(call)
             else:
                 calls[key] = call
-    return calls
+    return calls, totals
+
+
+def fix_output_tokens(calls: list[Call], sessions: dict[str, SessionTotals], since: float) -> None:
+    """Correct output tokens, which transcripts often record only as the value at the start of streaming.
+
+    A session whose `cost-state` snapshot covers all of its activity, and which started inside the window,
+    is reconciled: Claude Code's authoritative per-model output total is spread across that session's
+    requests in proportion to the content each one generated. Everything else is estimated as the larger
+    of the recorded count and content / CHARS_PER_OUTPUT_TOKEN. Hidden thinking tokens are only captured
+    by reconciliation.
+    """
+    by_session_model: dict[tuple[str, str], list[Call]] = defaultdict(list)
+    for call in calls:
+        by_session_model[(call.session, call.model)].append(call)
+    for (session, model), group in by_session_model.items():
+        totals = sessions.get(session)
+        target = totals.output_by_model.get(model) if totals and totals.complete and totals.start >= since else None
+        weights = [max(c.content_chars, 1) for c in group]
+        if target:
+            share = target / sum(weights)
+            for call, weight in zip(group, weights, strict=True):
+                call.output, call.output_basis = round(weight * share), "reconciled"
+        else:
+            for call in group:
+                estimate = round(call.content_chars / CHARS_PER_OUTPUT_TOKEN)
+                if estimate > call.output:
+                    call.output, call.output_basis = estimate, "estimated"
 
 
 # ---- pricing -----------------------------------------------------------------
@@ -234,12 +311,17 @@ def build_report(
     root = root or projects_dir()
 
     calls: dict[str, Call] = {}
+    sessions: dict[str, SessionTotals] = {}
     for path, agent in transcript_files(root, since):
-        for key, call in read_calls(path, agent, since, until).items():
+        file_calls, totals = read_calls(path, agent, since, until)
+        if totals is not None and agent == MAIN:
+            sessions[path.stem] = totals
+        for key, call in file_calls.items():
             if key in calls:
                 calls[key].merge(call)
             else:
                 calls[key] = call
+    fix_output_tokens(list(calls.values()), sessions, since)
 
     # Attribute every call to the project its session started in (cwd drifts as Claude cds around).
     first: dict[str, Call] = {}
@@ -361,6 +443,14 @@ def render(report: dict, markdown: bool = False) -> str:
     ]
     if report["routed_share_of_cost"] is not None:
         parts.append(f"Router lanes account for {report['routed_share_of_cost']:.0%} of estimated cost.")
+    basis = t["output_basis"]
+    if basis:
+        labels = {
+            "reconciled": "reconciled with Claude Code session totals",
+            "estimated": "estimated from generated content",
+            "recorded": "as recorded",
+        }
+        parts.append("Output tokens: " + ", ".join(f"{n} requests {labels.get(k, k)}" for k, n in basis.items()) + ".")
 
     stats = ["requests", "input (incl. cache)", "output", "effort", "est. cost"]
 

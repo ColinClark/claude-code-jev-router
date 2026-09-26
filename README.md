@@ -273,6 +273,16 @@ not a router lane  general-purpose  55        13.0M                67.9k   mediu
   including `subagents/`). The router doesn't keep a separate usage log, so there's nothing extra to grow.
   Only transcripts modified inside the window are opened, and each API request is counted once, even
   though Claude Code writes one line per content block.
+- **Input and cache tokens** come straight from the transcripts and are exact.
+- **Output tokens need correcting.** Transcripts often record a turn's output count from the start of
+  streaming (a few tokens), especially for tool-call turns, and never write back the final count. The
+  report fixes this in one of two ways, and its summary says how many requests used each:
+  - **Reconciled:** when a session's `cost-state` record (Claude Code's own per-model totals, including
+    subagents and hidden thinking) covers all of the session's activity and the session started inside the
+    window, the authoritative output total is split across its requests in proportion to the content each
+    one generated. Totals then match Claude Code's `/cost` and headless `total_cost_usd` exactly.
+  - **Estimated:** otherwise, each request uses the larger of the recorded count and its generated content
+    divided by 2.5 characters per token. Hidden thinking tokens are missed, so these figures run low.
 - **Estimated cost** uses the `pricing` table in `policy/policy.json`: USD per million tokens for input,
   output, 5-minute and 1-hour cache writes, and cache reads. These are API-equivalent estimates. On a
   subscription plan they are not your bill; they're a way to compare lanes. Models without a price are
