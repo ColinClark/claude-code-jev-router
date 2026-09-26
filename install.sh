@@ -2,7 +2,8 @@
 # Install the smart router globally for Claude Code (all projects).
 #
 #   ./install.sh                     install or update
-#   ./install.sh --set-model         also make claude-opus-5-5 the default main-session model
+#   ./install.sh --set-model         also make claude-opus-5-5 the default main-session (orchestrator) model
+#   ./install.sh --set-model=MODEL   ... or any other model, e.g. --set-model=claude-sonnet-5
 #
 # What it does (idempotent):
 #   1. Copies this repo to $CLAUDE_ROUTER_HOME (default ~/.claude/router) and builds its venv with uv.
@@ -20,10 +21,11 @@ SRC="$(cd "$(dirname "$0")" && pwd)"
 CLAUDE_DIR="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
 DEST="${CLAUDE_ROUTER_HOME:-$CLAUDE_DIR/router}"
 JEV_ENV="${JEV_ENV_FILE:-$HOME/.config/jev/.env}"
-SET_MODEL=0
+SET_MODEL=""
 for arg in "$@"; do
   case "$arg" in
-    --set-model) SET_MODEL=1 ;;
+    --set-model) SET_MODEL="claude-opus-5-5" ;;
+    --set-model=*) SET_MODEL="${arg#--set-model=}" ;;
     -h|--help) sed -n '2,15p' "$0"; exit 0 ;;
     *) echo "unknown option: $arg" >&2; exit 2 ;;
   esac
@@ -154,8 +156,8 @@ hooks.setdefault("SessionStart", []).append(
 # Dispatch gate: implement-* agents only run with a routing decision ("Task" is the Agent tool's older name).
 hooks.setdefault("PreToolUse", []).append(
     {"matcher": "Agent|Task", "hooks": [{"type": "command", "command": str(dest / "jev-mcp/.venv/bin/router-gate")}]})
-if os.environ.get("SET_MODEL") == "1":
-    settings["model"] = "claude-opus-5-5"
+if os.environ.get("SET_MODEL"):
+    settings["model"] = os.environ["SET_MODEL"]
 settings_path.write_text(json.dumps(settings, indent=2) + "\n")
 PY
 

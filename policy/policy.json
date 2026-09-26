@@ -1,7 +1,7 @@
 {
-  "policy_version": "1.1",
+  "policy_version": "1.2",
   "lanes": {
-    "OPUS_LOW":    {"agent": "implement-small",     "model": "claude-opus-5-5",  "effort": "low"},
+    "SONNET_MEDIUM": {"agent": "implement-small",   "model": "claude-sonnet-5",  "effort": "medium"},
     "OPUS_MEDIUM": {"agent": "implement-medium",    "model": "claude-opus-5-5",  "effort": "medium"},
     "OPUS_HIGH":   {"agent": "implement-high",      "model": "claude-opus-5-5",  "effort": "high"},
     "FABLE_HIGH":  {"agent": "implement-escalated", "model": "claude-fable-5-1", "effort": "high"},
@@ -9,9 +9,9 @@
     "LOOKUP":      {"agent": "lookup",              "model": "claude-haiku-4-5-20251001", "effort": null},
     "RESEARCH":    {"agent": "research",            "model": "claude-sonnet-5",  "effort": "medium"}
   },
-  "ladder": ["OPUS_LOW", "OPUS_MEDIUM", "OPUS_HIGH", "FABLE_HIGH", "FABLE_XHIGH"],
+  "ladder": ["SONNET_MEDIUM", "OPUS_MEDIUM", "OPUS_HIGH", "FABLE_HIGH", "FABLE_XHIGH"],
   "classes": {
-    "SMALL":    {"lane": "OPUS_LOW",    "description": "Small, well-understood change: bounded scope (roughly one module), known pattern, obvious verification. Scaffolding, configuration, a CLI over existing code."},
+    "SMALL":    {"lane": "SONNET_MEDIUM", "description": "Small, well-understood change: bounded scope (roughly one module), known pattern, obvious verification. Scaffolding, configuration, a CLI over existing code."},
     "MEDIUM":   {"lane": "OPUS_MEDIUM", "description": "Normal feature work: a few files, some design choices, standard tests."},
     "HIGH":     {"lane": "OPUS_HIGH",   "description": "Complex debugging, cross-cutting edits, concurrency and locking, data integrity and migrations, or security-sensitive behavior."},
     "ESCALATE": {"lane": "FABLE_HIGH",  "description": "Unresolved architecture, competing designs, or difficult failures that stronger models have not resolved."}

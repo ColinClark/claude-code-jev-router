@@ -25,7 +25,7 @@ Project-level `.claude/agents/<name>.md` files override the global lane agents o
 
 | Lane | Agent | Model / effort | Use for |
 | --- | --- | --- | --- |
-| OPUS_LOW | `implement-small` | Opus 5.5 / low | Small, understood implementation: scaffolding, config, a CLI over existing code |
+| SONNET_MEDIUM | `implement-small` | Sonnet 5 / medium | Small, understood implementation: scaffolding, config, a CLI over existing code |
 | OPUS_MEDIUM | `implement-medium` | Opus 5.5 / medium | Normal feature work: a few files, some design choices, standard tests |
 | OPUS_HIGH | `implement-high` | Opus 5.5 / high | Complex debugging, cross-cutting edits, concurrency and locking, data integrity and migrations, security-sensitive |
 | FABLE_HIGH | `implement-escalated` | Fable 5.1 / high | Unresolved architecture, difficult failures |

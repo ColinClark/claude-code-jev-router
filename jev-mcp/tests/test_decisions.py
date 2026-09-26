@@ -7,7 +7,7 @@ from jev_router.jev import ChoiceAnswer, JevError
 from jev_router.policy import Policy, hard_gates
 from jev_router.schemas import ClassifyRequest, CompletionRequest, EscalationRequest, Evidence, ProgressRequest
 
-LADDER = ["OPUS_LOW", "OPUS_MEDIUM", "OPUS_HIGH", "FABLE_HIGH", "FABLE_XHIGH"]
+LADDER = ["SONNET_MEDIUM", "OPUS_MEDIUM", "OPUS_HIGH", "FABLE_HIGH", "FABLE_XHIGH"]
 ID = {"schema_version": "1.0", "request_id": "r1", "task_id": "t1", "policy_version": Policy.load().version}
 
 
@@ -55,7 +55,12 @@ def test_classify_maps_class_to_lane_and_echoes_identity(tmp_path):
     d = decider(FakeJev("SMALL", 0.9), tmp_path)
     out = run(ClassifyRequest, d.classify, {**ID, "task": "fix flag", "available_lanes": LADDER})
     assert out["class"] == "SMALL"
-    assert out["route"] == {"lane": "OPUS_LOW", "model": "claude-opus-5-5", "effort": "low", "agent": "implement-small"}
+    assert out["route"] == {
+        "lane": "SONNET_MEDIUM",
+        "model": "claude-sonnet-5",
+        "effort": "medium",
+        "agent": "implement-small",
+    }
     assert out["request_id"] == "r1" and out["evidence_fingerprint"] is None
     assert json.loads((tmp_path / "ledger.jsonl").read_text())["class"] == "SMALL"
 
@@ -151,7 +156,7 @@ def test_progress_unrun_checks_force_verify_without_jev(tmp_path, status):
     out = run(
         ProgressRequest,
         decider(jev, tmp_path).progress,
-        {**ID, "current_lane": "OPUS_LOW", "attempt": 1, "evidence": ev},
+        {**ID, "current_lane": "SONNET_MEDIUM", "attempt": 1, "evidence": ev},
     )
     assert out["action"] == "VERIFY" and out["decided_by"] == "local_rule" and not jev.calls
 
@@ -161,7 +166,7 @@ def test_progress_escalates_after_lane_failure_budget(tmp_path):
     out = run(
         ProgressRequest,
         decider(jev, tmp_path).progress,
-        {**ID, "current_lane": "OPUS_LOW", "attempt": 2, "evidence": FAILING},
+        {**ID, "current_lane": "SONNET_MEDIUM", "attempt": 2, "evidence": FAILING},
     )
     assert out["action"] == "ESCALATE" and not jev.calls
 
@@ -179,7 +184,7 @@ def test_progress_low_confidence_becomes_verify(tmp_path):
     out = run(
         ProgressRequest,
         decider(FakeJev("RETRY", 0.4), tmp_path).progress,
-        {**ID, "current_lane": "OPUS_LOW", "attempt": 1, "evidence": FAILING},
+        {**ID, "current_lane": "SONNET_MEDIUM", "attempt": 1, "evidence": FAILING},
     )
     assert out["action"] == "VERIFY"
 

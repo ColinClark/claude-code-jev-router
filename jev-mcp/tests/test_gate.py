@@ -9,7 +9,7 @@ from jev_router.policy import Policy
 from jev_router.schemas import ClassifyRequest, EscalationRequest, OverrideRequest
 
 SESSION = "sess-123"
-LADDER = ["OPUS_LOW", "OPUS_MEDIUM", "OPUS_HIGH", "FABLE_HIGH", "FABLE_XHIGH"]
+LADDER = ["SONNET_MEDIUM", "OPUS_MEDIUM", "OPUS_HIGH", "FABLE_HIGH", "FABLE_XHIGH"]
 
 
 class FakeJev:
@@ -146,4 +146,4 @@ def test_report_summarizes_gate_and_overrides(env):
     dispatch(env, "implement-high")
     summary = usage.decision_summary(env["ledger"], 0, 9e12, Policy.load())
     assert summary["dispatch_gate"] == {"ALLOWED": 1, "BLOCKED_DISPATCH": 1}
-    assert summary["decisions"] == 1 and summary["initial_lanes"] == {"OPUS_LOW": 1}
+    assert summary["decisions"] == 1 and summary["initial_lanes"] == {"SONNET_MEDIUM": 1}

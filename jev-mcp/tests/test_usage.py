@@ -62,8 +62,9 @@ def projects(tmp_path):
     )
     # Router lane subagent on the right model.
     sub = proj / "s1" / "subagents"
-    write_jsonl(sub / "agent-a.jsonl", [assistant("r2", "claude-opus-5-5", NOW - 2 * HOUR, output=100, effort="low")])
-    (sub / "agent-a.meta.json").write_text(json.dumps({"agentType": "implement-small"}))
+    worker = assistant("r2", "claude-opus-5-5", NOW - 2 * HOUR, output=100, effort="medium")
+    write_jsonl(sub / "agent-a.jsonl", [worker])
+    (sub / "agent-a.meta.json").write_text(json.dumps({"agentType": "implement-medium"}))
     # Router lane subagent on the WRONG model (mismatch), plus an unpriced model elsewhere.
     write_jsonl(sub / "agent-b.jsonl", [assistant("r3", "claude-sonnet-5", NOW - 2 * HOUR, output=50)])
     (sub / "agent-b.meta.json").write_text(json.dumps({"agentType": "implement-high"}))
@@ -89,8 +90,8 @@ def test_report_dedupes_filters_prices_and_maps_lanes(projects, tmp_path):
     assert report["by_model"]["mystery-model"]["unpriced_requests"] == 1
 
     agents = report["by_agent"]
-    assert agents["implement-small"]["lane"] == "OPUS_LOW"
-    assert agents["implement-small"]["efforts"] == {"low": 1}
+    assert agents["implement-medium"]["lane"] == "OPUS_MEDIUM"
+    assert agents["implement-medium"]["efforts"] == {"medium": 1}
     assert agents[usage.MAIN]["lane"] == "—"
     assert agents["Explore"]["lane"] == "not a router lane"
     assert report["lane_model_mismatches"] == [
@@ -154,7 +155,7 @@ def test_decision_summary_prunes_ledger_and_counts(tmp_path):
 def test_render_text_and_markdown(projects, tmp_path):
     report = usage.build_report(Policy.load(), 24, now=NOW, root=projects, ledger=tmp_path / "none.jsonl")
     text = usage.render(report)
-    assert "By lane / agent" in text and "implement-small" in text and "mismatches" in text
+    assert "By lane / agent" in text and "implement-medium" in text and "mismatches" in text
     md = usage.render(report, markdown=True)
     assert md.startswith("## Model usage") and "| model |" in md
 
