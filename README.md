@@ -64,7 +64,7 @@ next unit, retry, escalate, verify, or a final report with lanes used, checks, e
 
 | Lane | Agent | Model / effort | Used for |
 | --- | --- | --- | --- |
-| `OPUS_LOW` | `implement-small` | Opus 5.5 / low | Small, well-understood changes |
+| `SONNET_MEDIUM` | `implement-small` | Sonnet 5 / medium | Small, well-understood changes: scaffolding, config, a CLI over existing code |
 | `OPUS_MEDIUM` | `implement-medium` | Opus 5.5 / medium | Normal feature work |
 | `OPUS_HIGH` | `implement-high` | Opus 5.5 / high | Complex debugging, cross-cutting or security-sensitive work |
 | `FABLE_HIGH` | `implement-escalated` | Fable 5.1 / high | Unresolved architecture or difficult failures |
@@ -72,7 +72,7 @@ next unit, retry, escalate, verify, or a final report with lanes used, checks, e
 | `LOOKUP` | `lookup` | Haiku 4.5 | Read-only symbol and file lookup |
 | `RESEARCH` | `research` | Sonnet 5 / medium | Read-only multi-file investigation |
 
-Escalation follows the ladder `OPUS_LOW → OPUS_MEDIUM → OPUS_HIGH → FABLE_HIGH → FABLE_XHIGH` and needs
+Escalation follows the ladder `SONNET_MEDIUM → OPUS_MEDIUM → OPUS_HIGH → FABLE_HIGH → FABLE_XHIGH` and needs
 evidence at each step. Default limits: 2 failed cycles per lane, 6 cycles per unit, and a Jev confidence
 threshold of 0.80. When the hard part is solved, the next unit is classified afresh and can drop back to a
 cheaper lane.
@@ -85,23 +85,30 @@ main session handles these directly, so they cost no subagent overhead.
 ## Benchmark: router vs. no router
 
 [`benchmarks/`](benchmarks/) runs the same task headlessly with the router off (`CLAUDE_ROUTER=off`) and
-on, using the same model (Opus 5.5 at medium effort), budget and seed repo. It grades every result with a
-hidden acceptance suite that neither mode sees. First task, **tinykv** (a key-value store with TTL, atomic
-writes, multi-process locking and a CLI), 2 runs per mode:
+on, from the same seed repo and budget. It grades every result with a hidden acceptance suite that no run
+sees. First task: **tinykv**, a key-value store with TTL, atomic writes, multi-process locking and a CLI.
+2 runs per configuration:
 
-| | baseline (router off) | router |
-| --- | ---: | ---: |
-| Hidden acceptance (10 tests) | 10/10 in both runs | 10/10 in both runs |
-| Tests the run wrote itself | 17–24 | 40–44 |
-| Mean cost (API-equivalent) | **$0.53** | $1.24 |
-| Mean wall time | **2.0 min** | 4.7 min |
-| Routing | one session did everything | scaffold → OPUS_LOW · store with locking → OPUS_HIGH · CLI → OPUS_LOW (every unit classified by Jev, 3/3 dispatches allowed by the gate) |
+| Configuration | Hidden acceptance | Mean cost (API-equivalent) | Mean wall time |
+| --- | ---: | ---: | ---: |
+| **baseline · Opus 5.5** (router off) | 10/10 in both runs | **$0.53** | **2.0 min** |
+| baseline · Sonnet 5 (router off) | 10/10 in both runs | $0.53 | 2.8 min |
+| router · Opus 5.5 orchestrator · SMALL → Opus low (policy 1.1) | 10/10 in both runs | $1.24 | 4.7 min |
+| router · Opus 5.5 orchestrator · SMALL → Sonnet 5 (policy 1.2) | 10/10 in both runs | $1.38 | 6.0 min |
+| router · Sonnet 5 orchestrator · SMALL → Sonnet 5 (policy 1.2) | 10/10 in both runs | $1.69 | 9.8 min |
 
-**Takeaway:** on a small, well-specified task, both modes are correct, and the router's orchestration
-overhead (splitting, per-unit contracts, independent verification) makes it cost about 2.3× more. It also
-had no cheaper model to route to, because every lane here is Opus 5.5. The router is aimed at hard, long or
-mixed-price work, which this task doesn't exercise. See [`benchmarks/README.md`](benchmarks/README.md) for
-the full analysis, per-run results, generated code, and how to run or add tasks.
+In every router run, Jev classified each unit (scaffold → SMALL, store with locking → HIGH, CLI → SMALL)
+and the gate allowed every routed dispatch.
+
+**Takeaways:**
+- **Everything was correct,** so on a small, well-specified task the router's orchestration overhead
+  (splitting, per-unit contracts, independent verification) isn't repaid.
+- **Switching to Sonnet didn't lower costs.** Sonnet 5 is half Opus 5.5's per-token price but needed more
+  requests for the same work, so neither the Sonnet lane nor the Sonnet orchestrator reduced cost.
+- **The router is aimed at hard, long or failure-prone work,** which this task doesn't exercise.
+
+See [`benchmarks/README.md`](benchmarks/README.md) for the full analysis, per-run results, generated code,
+and how to run or add tasks.
 
 ---
 
@@ -147,7 +154,8 @@ Optional flag:
 
 | Flag | Effect |
 | --- | --- |
-| `--set-model` | Also sets `claude-opus-5-5` as your default main-session model in `~/.claude/settings.json`, which is the recommended orchestrator |
+| `--set-model` | Also sets `claude-opus-5-5` as your default main-session model (the orchestrator) in `~/.claude/settings.json`. This is the recommended orchestrator; in the [benchmark](#benchmark-router-vs-no-router), a Sonnet 5 orchestrator was slower and more expensive |
+| `--set-model=MODEL` | Sets any other main-session model, for example `--set-model=claude-sonnet-5` |
 
 ### 3. What the installer changes
 

@@ -1,0 +1,186 @@
+{
+  "window": {
+    "hours": 1.0,
+    "since": "2026-09-26T10:31:38+00:00",
+    "until": "2026-09-26T11:31:38+00:00",
+    "project_filter": "tinykv-router-20260926T112531Z-51521"
+  },
+  "totals": {
+    "requests": 41,
+    "runs": 4,
+    "input_tokens": 82,
+    "output_tokens": 32450,
+    "cache_write_tokens": 101002,
+    "cache_read_tokens": 990959,
+    "est_cost_usd": 1.359,
+    "unpriced_requests": 0,
+    "models": {
+      "claude-sonnet-5": 21,
+      "claude-opus-5-5": 20
+    },
+    "efforts": {
+      "medium": 33,
+      "high": 8
+    },
+    "output_basis": {
+      "reconciled": 41
+    },
+    "sessions": 1
+  },
+  "routed_share_of_cost": 0.4755,
+  "by_model": {
+    "claude-opus-5-5": {
+      "requests": 20,
+      "runs": 2,
+      "input_tokens": 40,
+      "output_tokens": 25070,
+      "cache_write_tokens": 73136,
+      "cache_read_tokens": 648225,
+      "est_cost_usd": 1.1469,
+      "unpriced_requests": 0,
+      "models": {
+        "claude-opus-5-5": 20
+      },
+      "efforts": {
+        "medium": 12,
+        "high": 8
+      },
+      "output_basis": {
+        "reconciled": 20
+      }
+    },
+    "claude-sonnet-5": {
+      "requests": 21,
+      "runs": 2,
+      "input_tokens": 42,
+      "output_tokens": 7380,
+      "cache_write_tokens": 27866,
+      "cache_read_tokens": 342734,
+      "est_cost_usd": 0.2121,
+      "unpriced_requests": 0,
+      "models": {
+        "claude-sonnet-5": 21
+      },
+      "efforts": {
+        "medium": 21
+      },
+      "output_basis": {
+        "reconciled": 21
+      }
+    }
+  },
+  "by_agent": {
+    "main session": {
+      "lane": "\u2014",
+      "requests": 12,
+      "runs": 1,
+      "input_tokens": 24,
+      "output_tokens": 10439,
+      "cache_write_tokens": 49998,
+      "cache_read_tokens": 519489,
+      "est_cost_usd": 0.7128,
+      "unpriced_requests": 0,
+      "models": {
+        "claude-opus-5-5": 12
+      },
+      "efforts": {
+        "medium": 12
+      },
+      "output_basis": {
+        "reconciled": 12
+      }
+    },
+    "implement-high": {
+      "lane": "OPUS_HIGH",
+      "requests": 8,
+      "runs": 1,
+      "input_tokens": 16,
+      "output_tokens": 14631,
+      "cache_write_tokens": 23138,
+      "cache_read_tokens": 128736,
+      "est_cost_usd": 0.4341,
+      "unpriced_requests": 0,
+      "models": {
+        "claude-opus-5-5": 8
+      },
+      "efforts": {
+        "high": 8
+      },
+      "output_basis": {
+        "reconciled": 8
+      }
+    },
+    "implement-small": {
+      "lane": "SONNET_MEDIUM",
+      "requests": 21,
+      "runs": 2,
+      "input_tokens": 42,
+      "output_tokens": 7380,
+      "cache_write_tokens": 27866,
+      "cache_read_tokens": 342734,
+      "est_cost_usd": 0.2121,
+      "unpriced_requests": 0,
+      "models": {
+        "claude-sonnet-5": 21
+      },
+      "efforts": {
+        "medium": 21
+      },
+      "output_basis": {
+        "reconciled": 21
+      }
+    }
+  },
+  "by_project": {
+    "/private/var/folders/rd/102wqq3j47d0dv3nfwbnp_xr0000gn/T/claude-router-bench/tinykv-router-20260926T112531Z-51521": {
+      "requests": 41,
+      "runs": 4,
+      "input_tokens": 82,
+      "output_tokens": 32450,
+      "cache_write_tokens": 101002,
+      "cache_read_tokens": 990959,
+      "est_cost_usd": 1.359,
+      "unpriced_requests": 0,
+      "models": {
+        "claude-sonnet-5": 21,
+        "claude-opus-5-5": 20
+      },
+      "efforts": {
+        "medium": 33,
+        "high": 8
+      },
+      "output_basis": {
+        "reconciled": 41
+      }
+    }
+  },
+  "lane_model_mismatches": [],
+  "router_decisions": {
+    "decisions": 21,
+    "tasks": 21,
+    "dispatch_gate": {
+      "ALLOWED": 21
+    },
+    "overrides": 0,
+    "jev_errors": {},
+    "by_tool": {
+      "classify_task": 21
+    },
+    "actions": {},
+    "classes": {
+      "SMALL": 13,
+      "HIGH": 8
+    },
+    "initial_lanes": {
+      "OPUS_HIGH": 8,
+      "SONNET_MEDIUM": 7,
+      "OPUS_LOW": 6
+    },
+    "decided_by": {
+      "jev": 21
+    },
+    "avg_jev_confidence": 0.934,
+    "retention_hours": 24.0
+  },
+  "pricing_note": "API-equivalent estimate from policy.json pricing; not your actual bill on a subscription plan."
+}

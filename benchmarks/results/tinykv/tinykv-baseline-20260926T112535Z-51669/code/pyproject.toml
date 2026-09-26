@@ -1,0 +1,35 @@
+[project]
+name = "tinykv"
+version = "0.1.0"
+description = "A small persistent, TTL-aware, multi-process-safe key-value store."
+authors = [
+    { name = "Colin Clark", email = "colin@clark.ws" }
+]
+requires-python = ">=3.12"
+dependencies = []
+
+[project.scripts]
+tinykv = "tinykv.__main__:main"
+
+[build-system]
+requires = ["uv_build>=0.12.18,<0.13.0"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-root = ""
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.6",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

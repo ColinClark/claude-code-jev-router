@@ -29,6 +29,14 @@ def db(tmp_path):
     return str(tmp_path / "store.json")
 
 
+def absent(store, key) -> bool:
+    """The prompt only says missing/expired keys are "never returned": accept get() -> None or KeyError."""
+    try:
+        return store.get(key) is None
+    except KeyError:
+        return True
+
+
 def test_crud_roundtrip(db):
     s = Store(db)
     s.set("a", 1)
@@ -38,12 +46,12 @@ def test_crud_roundtrip(db):
     s.set("a", "updated")
     assert s.get("a") == "updated"
     s.delete("a")
-    assert s.get("a") is None
+    assert absent(s, "a")
     assert sorted(s.keys()) == ["b"]
 
 
-def test_missing_key_returns_none(db):
-    assert Store(db).get("nope") is None
+def test_missing_key_is_not_returned(db):
+    assert absent(Store(db), "nope")
 
 
 def test_persistence_across_instances(db):
@@ -58,10 +66,10 @@ def test_ttl_expiry(db):
     s.set("forever", "no ttl")
     assert s.get("short") == "gone soon"
     time.sleep(1.2)
-    assert s.get("short") is None
+    assert absent(s, "short")
     assert "short" not in list(s.keys())
     assert sorted(s.keys()) == ["forever", "long"]
-    assert Store(db).get("short") is None  # also expired for a fresh instance
+    assert absent(Store(db), "short")  # also expired for a fresh instance
 
 
 def test_expired_keys_dropped_on_next_write(db):
