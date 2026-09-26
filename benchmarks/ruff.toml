@@ -1,7 +1,9 @@
 # Lint settings for the benchmark harness and acceptance suites (pytest asserts are expected here).
 line-length = 120
 target-version = "py312"
-extend-exclude = ["results"]  # generated code from benchmark runs is kept exactly as produced
+# Generated run code is kept exactly as produced; seed/ and reference/ are task fixtures (the seed is what
+# every run starts from, so it is never reformatted once runs exist).
+extend-exclude = ["results", "**/seed", "**/reference"]
 
 [lint]
 select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF"]

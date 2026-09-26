@@ -14,7 +14,7 @@ from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 
 ID = {"schema_version": "1.0", "task_id": "smoke", "policy_version": "1.0"}
-LADDER = ["SONNET_MEDIUM", "OPUS_MEDIUM", "OPUS_HIGH", "FABLE_HIGH", "FABLE_XHIGH"]
+LADDER = ["OPUS_LOW", "OPUS_MEDIUM", "OPUS_HIGH", "FABLE_HIGH", "FABLE_XHIGH"]
 EXPECTED_TOOLS = {
     "get_policy",
     "classify_task",
@@ -26,12 +26,13 @@ EXPECTED_TOOLS = {
 
 TASKS = [
     # (task, signals, lanes the result may land in)
-    ("Fix a typo in a README heading", {}, {"SONNET_MEDIUM"}),
-    ("Add pagination to an existing REST list endpoint with tests", {}, {"OPUS_MEDIUM", "OPUS_HIGH"}),
+    ("Fix a typo in a README heading", {}, {"OPUS_LOW"}),
+    # low-confidence MEDIUM hedges down to OPUS_LOW under policy 1.4
+    ("Add pagination to an existing REST list endpoint with tests", {}, {"OPUS_LOW", "OPUS_MEDIUM"}),
     (
         "Debug an intermittent race condition between Redis stream workers and the SSE publisher",
         {},
-        {"OPUS_HIGH", "FABLE_HIGH"},
+        {"OPUS_MEDIUM"},  # predicted HIGH, first attempt capped (policy 1.4)
     ),
     ("Rotate session tokens on password change", {"security_sensitive": True}, {"OPUS_HIGH", "FABLE_HIGH"}),
 ]

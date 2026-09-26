@@ -13,7 +13,7 @@ from pathlib import Path
 
 from . import retention
 from .jev import JevClient, JevError
-from .policy import CLASS_ORDER, Policy, PolicyError, floor_class, hard_gates, raise_class
+from .policy import CLASS_ORDER, Policy, PolicyError, floor_class, hard_gates
 from .schemas import (
     ClassifyRequest,
     CompletionRequest,
@@ -89,19 +89,28 @@ class Decider:
 
         cls, notes = answer.choice, [f"Jev chose {answer.choice} ({answer.confidence:.2f})."]
         if answer.confidence < self.policy.confidence_threshold:
-            # Hedge toward the stronger of Jev's top two candidates; blind +1 only without probabilities.
+            # Escalation is evidence-driven, so an uncertain first guess errs cheap: a too-low guess costs one
+            # verified retry, a too-high guess costs the stronger lane on every run.
             top_two = sorted(answer.probabilities, key=answer.probabilities.get, reverse=True)[:2]
             if len(top_two) == 2 and answer.choice in top_two:
-                cls = max(top_two, key=CLASS_ORDER.index)
-            else:
-                cls = raise_class(cls)
+                cls = min(top_two, key=CLASS_ORDER.index)
             notes.append(f"Below threshold {self.policy.confidence_threshold:.2f}; hedged to {cls}.")
-        if _truthy(req.signals.get("security_sensitive")):
+        security = _truthy(req.signals.get("security_sensitive"))
+        if security:
             floored = floor_class(cls, self.policy.security_min_class)
             if floored != cls:
                 notes.append(f"Security-sensitive; raised to {floored}.")
             cls = floored
         lane = self.policy.lane_for_class(cls, candidates)
+        cap = self.policy.first_attempt_max_lane
+        ladder = self.policy.ladder
+        if cap and not security and ladder.index(lane) > ladder.index(cap):
+            allowed = [c for c in candidates if ladder.index(c) <= ladder.index(cap)]
+            if allowed:
+                lane = allowed[-1]  # candidates are in ladder order: the strongest lane within the cap
+                notes.append(
+                    f"First attempt capped at {lane}; stronger lanes need a verified failure (decide_escalation)."
+                )
         return self._result(
             req, None, "jev", answer.confidence, " ".join(notes), **{"class": cls, "route": self.policy.route(lane)}
         )

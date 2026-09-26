@@ -55,10 +55,11 @@ end=$(date +%s)
 unset CLAUDE_ROUTER
 
 # Independent verification of the produced workspace.
-(cd "$WORK" && uv run --quiet pytest -q) > "$OUT/pytest.log" 2>&1; pytest_rc=$?
+(cd "$WORK" && uv run --quiet pytest -q --junitxml="$OUT/pytest.xml") > "$OUT/pytest.log" 2>&1; pytest_rc=$?
 (cd "$WORK" && uv run --quiet ruff check .) > "$OUT/ruff.log" 2>&1; ruff_rc=$?
-passed="$(grep -Eo '[0-9]+ passed' "$OUT/pytest.log" | tail -1 | grep -Eo '[0-9]+' || echo 0)"
-failed="$(grep -Eo '[0-9]+ failed' "$OUT/pytest.log" | tail -1 | grep -Eo '[0-9]+' || echo 0)"
+# Count from the JUnit report: a project's own pytest options (e.g. -qq) can hide the summary line.
+read -r tests failed errors skipped < <(python3 "$ROOT/junit_counts.py" "$OUT/pytest.xml")
+passed=$(( tests - failed - errors - skipped ))
 jq -n --argjson p "$pytest_rc" --argjson r "$ruff_rc" --argjson np "${passed:-0}" --argjson nf "${failed:-0}" \
   '{pytest: {exit_code: $p, passed: $np, failed: $nf}, ruff: {exit_code: $r}}' > "$OUT/checks.json"
 

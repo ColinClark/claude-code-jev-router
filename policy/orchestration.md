@@ -25,7 +25,7 @@ Project-level `.claude/agents/<name>.md` files override the global lane agents o
 
 | Lane | Agent | Model / effort | Use for |
 | --- | --- | --- | --- |
-| SONNET_MEDIUM | `implement-small` | Sonnet 5 / medium | Small, understood implementation: scaffolding, config, a CLI over existing code |
+| OPUS_LOW | `implement-small` | Opus 5.5 / low | Small, understood implementation: scaffolding, config, a CLI over existing code |
 | OPUS_MEDIUM | `implement-medium` | Opus 5.5 / medium | Normal feature work: a few files, some design choices, standard tests |
 | OPUS_HIGH | `implement-high` | Opus 5.5 / high | Complex debugging, cross-cutting edits, concurrency and locking, data integrity and migrations, security-sensitive |
 | FABLE_HIGH | `implement-escalated` | Fable 5.1 / high | Unresolved architecture, difficult failures |
@@ -36,6 +36,12 @@ Project-level `.claude/agents/<name>.md` files override the global lane agents o
 Model choice and effort choice are separate. Raise effort first when an attempt missed files, checks or
 consequences; change model only when an adequately investigated problem still exceeds the model.
 Security-sensitive work is at least OPUS_HIGH.
+
+**Escalate on evidence, not on predicted difficulty.** A unit's first attempt runs at most on OPUS_MEDIUM
+(`classify_task` caps the route), even when Jev predicts HIGH or ESCALATE. OPUS_HIGH and the Fable lanes are
+reached only through `decide_escalation` after verification has shown a real failure. Benchmarks showed
+Opus 5.5 at medium effort solving "hard-looking" units (a SQL engine, a regex engine) that predictive routing
+sent to Fable at four times the cost. Security-sensitive units are the exception and start at OPUS_HIGH.
 
 ## Required cycle
 
@@ -56,6 +62,11 @@ Security-sensitive work is at least OPUS_HIGH.
      `implement-*` dispatch without an unused routing decision for that agent in this session. Each decision
      allows one dispatch. To change lanes afterwards use `decide_escalation`; for a user-named lane use
      `record_override`.
+   - **Work directly when delegation adds nothing.** If the whole task is a single unit whose route is
+     OPUS_MEDIUM and you are running on Opus 5.5 at medium effort yourself, implement it in this session
+     instead of dispatching: it is the same model and effort, and a worker would only re-read the context.
+     Still classify it (for the log), collect evidence and verify. If it then fails verification twice, call
+     `decide_escalation` and dispatch the escalated lane.
    - Pass the worker: task ID, criteria, allowed paths, baseline, prior hypotheses and the check commands.
      One implementation writer per checkout at a time; lookup/research may run in parallel and are not gated.
 3. **Evidence.** After each worker returns, never trust its report alone. Run

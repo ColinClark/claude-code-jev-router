@@ -30,6 +30,7 @@ class Policy:
     jev: dict = field(default_factory=dict)
     retention_hours: float = 24.0
     pricing: dict[str, dict] = field(default_factory=dict)
+    first_attempt_max_lane: str | None = None
 
     @classmethod
     def load(cls, path: str | os.PathLike | None = None) -> Policy:
@@ -48,10 +49,13 @@ class Policy:
             jev=raw.get("jev", {}),
             retention_hours=float(raw.get("retention_hours", 24)),
             pricing={k: v for k, v in raw.get("pricing", {}).items() if not k.startswith("_")},
+            first_attempt_max_lane=raw.get("first_attempt_max_lane"),
         )
         for lane in policy.ladder:
             if lane not in policy.lanes:
                 raise PolicyError(f"ladder lane {lane} is not defined")
+        if policy.first_attempt_max_lane and policy.first_attempt_max_lane not in policy.ladder:
+            raise PolicyError(f"first_attempt_max_lane {policy.first_attempt_max_lane} is not a ladder lane")
         for name, spec in policy.classes.items():
             if spec["lane"] not in policy.ladder:
                 raise PolicyError(f"class {name} maps to non-ladder lane {spec['lane']}")

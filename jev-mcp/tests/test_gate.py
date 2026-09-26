@@ -9,7 +9,7 @@ from jev_router.policy import Policy
 from jev_router.schemas import ClassifyRequest, EscalationRequest, OverrideRequest
 
 SESSION = "sess-123"
-LADDER = ["SONNET_MEDIUM", "OPUS_MEDIUM", "OPUS_HIGH", "FABLE_HIGH", "FABLE_XHIGH"]
+LADDER = ["OPUS_LOW", "OPUS_MEDIUM", "OPUS_HIGH", "FABLE_HIGH", "FABLE_XHIGH"]
 
 
 class FakeJev:
@@ -78,7 +78,7 @@ def test_other_sessions_decisions_do_not_count(env):
 def test_block_message_names_available_routes(env):
     classify(env["ledger"], 1, "HIGH")
     allowed, message = dispatch(env, "implement-small")
-    assert not allowed and "implement-high" in message
+    assert not allowed and "implement-medium" in message  # HIGH is capped at OPUS_MEDIUM for a first attempt
 
 
 def test_escalation_and_override_routes_are_accepted(env):
@@ -146,4 +146,4 @@ def test_report_summarizes_gate_and_overrides(env):
     dispatch(env, "implement-high")
     summary = usage.decision_summary(env["ledger"], 0, 9e12, Policy.load())
     assert summary["dispatch_gate"] == {"ALLOWED": 1, "BLOCKED_DISPATCH": 1}
-    assert summary["decisions"] == 1 and summary["initial_lanes"] == {"SONNET_MEDIUM": 1}
+    assert summary["decisions"] == 1 and summary["initial_lanes"] == {"OPUS_LOW": 1}

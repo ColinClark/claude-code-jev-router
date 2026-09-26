@@ -57,9 +57,26 @@ def load(run_dir: Path) -> dict | None:
     }
 
 
+def bug_groups(run: dict) -> dict[str, bool] | None:
+    """For suites with tests named test_bugN_*: bug id -> fixed (every test in the group passed)."""
+    tests = (run["acceptance"] or {}).get("tests") or {}
+    groups: dict[str, bool] = {}
+    for name, outcome in tests.items():
+        if name.startswith("test_bug"):
+            bug = name.split("_")[1]
+            groups[bug] = groups.get(bug, True) and outcome == "PASSED"
+    return groups or None
+
+
 def acceptance_cell(run: dict) -> str:
     a = run["acceptance"]
-    return f"{a['passed']}/{a['total']}" if a else "not graded"
+    if not a:
+        return "not graded"
+    cell = f"{a['passed']}/{a['total']}"
+    groups = bug_groups(run)
+    if groups:
+        cell += f" · bugs fixed {sum(groups.values())}/{len(groups)}"
+    return cell
 
 
 def lanes_line(run: dict) -> str:

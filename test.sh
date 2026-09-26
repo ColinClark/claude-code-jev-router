@@ -8,8 +8,8 @@ cd "$(dirname "$0")/jev-mcp"
 echo "==> ruff"
 uv run ruff check .
 uv run ruff format --check .
-uv run ruff check --config ../benchmarks/ruff.toml ../benchmarks
-uv run ruff format --check --config ../benchmarks/ruff.toml ../benchmarks
+uv run ruff check --config ../benchmarks/ruff.toml ../benchmarks/*.py ../benchmarks/*/acceptance
+uv run ruff format --check --config ../benchmarks/ruff.toml ../benchmarks/*.py ../benchmarks/*/acceptance
 
 echo "==> unit tests"
 uv run pytest -q

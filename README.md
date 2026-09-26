@@ -64,7 +64,7 @@ next unit, retry, escalate, verify, or a final report with lanes used, checks, e
 
 | Lane | Agent | Model / effort | Used for |
 | --- | --- | --- | --- |
-| `SONNET_MEDIUM` | `implement-small` | Sonnet 5 / medium | Small, well-understood changes: scaffolding, config, a CLI over existing code |
+| `OPUS_LOW` | `implement-small` | Opus 5.5 / low | Small, well-understood changes: scaffolding, config, a CLI over existing code |
 | `OPUS_MEDIUM` | `implement-medium` | Opus 5.5 / medium | Normal feature work |
 | `OPUS_HIGH` | `implement-high` | Opus 5.5 / high | Complex debugging, cross-cutting or security-sensitive work |
 | `FABLE_HIGH` | `implement-escalated` | Fable 5.1 / high | Unresolved architecture or difficult failures |
@@ -72,7 +72,7 @@ next unit, retry, escalate, verify, or a final report with lanes used, checks, e
 | `LOOKUP` | `lookup` | Haiku 4.5 | Read-only symbol and file lookup |
 | `RESEARCH` | `research` | Sonnet 5 / medium | Read-only multi-file investigation |
 
-Escalation follows the ladder `SONNET_MEDIUM → OPUS_MEDIUM → OPUS_HIGH → FABLE_HIGH → FABLE_XHIGH` and needs
+Escalation follows the ladder `OPUS_LOW → OPUS_MEDIUM → OPUS_HIGH → FABLE_HIGH → FABLE_XHIGH` and needs
 evidence at each step. Default limits: 2 failed cycles per lane, 6 cycles per unit, and a Jev confidence
 threshold of 0.80. When the hard part is solved, the next unit is classified afresh and can drop back to a
 cheaper lane.

@@ -21,14 +21,23 @@ for run in "$@"; do
   scratch="$(mktemp -d)"
   cp -R "$run/code/." "$scratch/"
   cp -R "$ACCEPT" "$scratch/_acceptance"
-  (cd "$scratch" && uv run --quiet --with pytest pytest -q -p no:cacheprovider _acceptance) > "$run/acceptance.log" 2>&1
+  (cd "$scratch" && uv run --quiet --with pytest pytest -v --color=no -p no:cacheprovider _acceptance) \
+    > "$run/acceptance.log" 2>&1
   rc=$?
   passed="$(grep -Eo '[0-9]+ passed' "$run/acceptance.log" | tail -1 | grep -Eo '[0-9]+' || echo 0)"
   failed="$(grep -Eo '[0-9]+ failed' "$run/acceptance.log" | tail -1 | grep -Eo '[0-9]+' || echo 0)"
   errors="$(grep -Eo '[0-9]+ errors?' "$run/acceptance.log" | tail -1 | grep -Eo '[0-9]+' || echo 0)"
-  total="$(cat "$ACCEPT"/test_*.py | grep -c '^def test_')"
+  # Total = collected cases; if collection itself failed (e.g. the package doesn't import), use the known count.
+  total=$(( ${passed:-0} + ${failed:-0} ))
+  if [[ $total -eq 0 && -f "$ACCEPT/EXPECTED_TOTAL" ]]; then total="$(cat "$ACCEPT/EXPECTED_TOTAL")"; fi
+  # Per-test outcomes from pytest -v lines like "_acceptance/test_x.py::test_name[param] PASSED".
+  grep -Eo '::[^ ]+ (PASSED|FAILED|ERROR)' "$run/acceptance.log" \
+    | jq -R 'capture("::(?<name>[^ ]+) (?<outcome>[A-Z]+)")' | jq -s 'map({(.name): .outcome}) | add // {}' \
+    > "$run/acceptance-tests.json"
   jq -n --argjson rc "$rc" --argjson p "${passed:-0}" --argjson f "${failed:-0}" --argjson e "${errors:-0}" \
-    --argjson t "${total:-0}" '{exit_code: $rc, passed: $p, failed: $f, errors: $e, total: $t}' > "$run/acceptance.json"
+    --argjson t "${total:-0}" --slurpfile tests "$run/acceptance-tests.json" \
+    '{exit_code: $rc, passed: $p, failed: $f, errors: $e, total: $t, tests: $tests[0]}' > "$run/acceptance.json"
+  rm -f "$run/acceptance-tests.json"
   echo "$(basename "$run"): acceptance ${passed:-0}/${total} passed (exit $rc)"
   rm -rf "$scratch"
 done
