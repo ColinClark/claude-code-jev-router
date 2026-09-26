@@ -85,30 +85,28 @@ main session handles these directly, so they cost no subagent overhead.
 ## Benchmark: router vs. no router
 
 [`benchmarks/`](benchmarks/) runs the same task headlessly with the router off (`CLAUDE_ROUTER=off`) and
-on, from the same seed repo and budget. It grades every result with a hidden acceptance suite that no run
-sees. First task: **tinykv**, a key-value store with TTL, atomic writes, multi-process locking and a CLI.
-2 runs per configuration:
+on, from the same seed repo and budget, and grades every result with a hidden acceptance suite that no run
+sees. There are four tasks, from a small feature up to a SQL engine graded against SQLite; 67 runs in
+total. Final configuration (policy 1.6) against a strong single-model baseline (Opus 5.5, medium effort):
 
-| Configuration | Hidden acceptance | Mean cost (API-equivalent) | Mean wall time |
-| --- | ---: | ---: | ---: |
-| **baseline · Opus 5.5** (router off) | 10/10 in both runs | **$0.53** | **2.0 min** |
-| baseline · Sonnet 5 (router off) | 10/10 in both runs | $0.53 | 2.8 min |
-| router · Opus 5.5 orchestrator · SMALL → Opus low (policy 1.1) | 10/10 in both runs | $1.24 | 4.7 min |
-| router · Opus 5.5 orchestrator · SMALL → Sonnet 5 (policy 1.2) | 10/10 in both runs | $1.38 | 6.0 min |
-| router · Sonnet 5 orchestrator · SMALL → Sonnet 5 (policy 1.2) | 10/10 in both runs | $1.69 | 9.8 min |
+| Task | Hidden acceptance | Opus 5.5 baseline | Router, policy 1.6 | Verdict |
+| --- | --- | ---: | ---: | --- |
+| tinykv (small feature) | 10/10, all runs | $0.53 · 2.0 min | $0.57 · 1.7 min | parity |
+| billing (audit, 6 planted bugs) | 25/25 and 6/6 bugs, all runs | $0.48 · 1.4 min | $0.48 · 1.3 min | parity |
+| miniregex (regex engine vs. `re`) | 77/77, all runs | $2.26 · 30 min | $2.02 · 28 min | parity |
+| minisql (SQL engine vs. SQLite) | 79/79, all runs | $5.23 · 22 min | **$3.82 · 16 min** | **27% cheaper and faster** |
 
-In every router run, Jev classified each unit (scaffold → SMALL, store with locking → HIGH, CLI → SMALL)
-and the gate allowed every routed dispatch.
-
-**Takeaways:**
-- **Everything was correct,** so on a small, well-specified task the router's orchestration overhead
-  (splitting, per-unit contracts, independent verification) isn't repaid.
-- **Switching to Sonnet didn't lower costs.** Sonnet 5 is half Opus 5.5's per-token price but needed more
-  requests for the same work, so neither the Sonnet lane nor the Sonnet orchestrator reduced cost.
-- **The router is aimed at hard, long or failure-prone work,** which this task doesn't exercise.
-
-See [`benchmarks/README.md`](benchmarks/README.md) for the full analysis, per-run results, generated code,
-and how to run or add tasks.
+**What we learned** (the details, and every policy tested, are in [`benchmarks/README.md`](benchmarks/README.md)):
+- **Escalate on evidence, not prediction.** Routing "hard-looking" units to Opus high effort or Fable on
+  prediction cost 2–4× with no quality gain, because Opus at medium effort solved them. So first attempts
+  are capped at OPUS_MEDIUM, and stronger lanes need a verified failure.
+- **Size the process to the task.** Full orchestration costs 30–130% extra on small tasks. Lightweight
+  mode, which does single-unit tasks directly and runs checks at the end, brings them back to parity.
+- **The router rescues cheaper models.** Sonnet 5 alone failed minisql (69/79); a Sonnet orchestrator with
+  the router scored 79/79 for less than the Opus baseline. Against "Fable for everything", the router gets
+  the same quality for much less.
+- **Part of the gain is operating discipline,** not multi-model routing. On these tasks no escalation was
+  ever needed.
 
 ---
 

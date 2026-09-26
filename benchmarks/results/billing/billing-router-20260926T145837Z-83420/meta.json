@@ -1,0 +1,15 @@
+{
+  "run_id": "billing-router-20260926T145837Z-83420",
+  "task": "billing",
+  "mode": "router",
+  "model": "claude-opus-5-5",
+  "effort": "medium",
+  "budget_usd": 30,
+  "claude_code": "2.1.283 (Claude Code)",
+  "router_policy": "1.6",
+  "session_id": "5388f124-7da7-4544-861d-d9f5b6ae33bc",
+  "started": 1790434717,
+  "ended": 1790434802,
+  "wall_seconds": 85,
+  "claude_exit": 0
+}

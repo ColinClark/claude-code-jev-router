@@ -1,0 +1,192 @@
+{
+  "window": {
+    "hours": 2.0,
+    "since": "2026-09-26T11:07:59+00:00",
+    "until": "2026-09-26T13:07:59+00:00",
+    "project_filter": "miniregex-router-20260926T115200Z-16452"
+  },
+  "totals": {
+    "requests": 64,
+    "runs": 3,
+    "input_tokens": 1208,
+    "output_tokens": 144129,
+    "cache_write_tokens": 289987,
+    "cache_read_tokens": 5607633,
+    "est_cost_usd": 11.3576,
+    "unpriced_requests": 0,
+    "models": {
+      "claude-fable-5-1": 39,
+      "claude-opus-5-5": 25
+    },
+    "efforts": {
+      "high": 39,
+      "medium": 22,
+      "low": 3
+    },
+    "output_basis": {
+      "reconciled": 64
+    },
+    "sessions": 1
+  },
+  "routed_share_of_cost": 0.9123,
+  "by_model": {
+    "claude-fable-5-1": {
+      "requests": 39,
+      "runs": 1,
+      "input_tokens": 1158,
+      "output_tokens": 127120,
+      "cache_write_tokens": 223781,
+      "cache_read_tokens": 4469028,
+      "est_cost_usd": 10.2821,
+      "unpriced_requests": 0,
+      "models": {
+        "claude-fable-5-1": 39
+      },
+      "efforts": {
+        "high": 39
+      },
+      "output_basis": {
+        "reconciled": 39
+      }
+    },
+    "claude-opus-5-5": {
+      "requests": 25,
+      "runs": 2,
+      "input_tokens": 50,
+      "output_tokens": 17009,
+      "cache_write_tokens": 66206,
+      "cache_read_tokens": 1138605,
+      "est_cost_usd": 1.0755,
+      "unpriced_requests": 0,
+      "models": {
+        "claude-opus-5-5": 25
+      },
+      "efforts": {
+        "medium": 22,
+        "low": 3
+      },
+      "output_basis": {
+        "reconciled": 25
+      }
+    }
+  },
+  "by_agent": {
+    "implement-escalated": {
+      "lane": "FABLE_HIGH",
+      "requests": 39,
+      "runs": 1,
+      "input_tokens": 1158,
+      "output_tokens": 127120,
+      "cache_write_tokens": 223781,
+      "cache_read_tokens": 4469028,
+      "est_cost_usd": 10.2821,
+      "unpriced_requests": 0,
+      "models": {
+        "claude-fable-5-1": 39
+      },
+      "efforts": {
+        "high": 39
+      },
+      "output_basis": {
+        "reconciled": 39
+      }
+    },
+    "main session": {
+      "lane": "\u2014",
+      "requests": 22,
+      "runs": 1,
+      "input_tokens": 44,
+      "output_tokens": 15089,
+      "cache_write_tokens": 58790,
+      "cache_read_tokens": 1116961,
+      "est_cost_usd": 0.9957,
+      "unpriced_requests": 0,
+      "models": {
+        "claude-opus-5-5": 22
+      },
+      "efforts": {
+        "medium": 22
+      },
+      "output_basis": {
+        "reconciled": 22
+      }
+    },
+    "implement-small": {
+      "lane": "OPUS_LOW",
+      "requests": 3,
+      "runs": 1,
+      "input_tokens": 6,
+      "output_tokens": 1920,
+      "cache_write_tokens": 7416,
+      "cache_read_tokens": 21644,
+      "est_cost_usd": 0.0798,
+      "unpriced_requests": 0,
+      "models": {
+        "claude-opus-5-5": 3
+      },
+      "efforts": {
+        "low": 3
+      },
+      "output_basis": {
+        "reconciled": 3
+      }
+    }
+  },
+  "by_project": {
+    "/private/var/folders/rd/102wqq3j47d0dv3nfwbnp_xr0000gn/T/claude-router-bench/miniregex-router-20260926T115200Z-16452": {
+      "requests": 64,
+      "runs": 3,
+      "input_tokens": 1208,
+      "output_tokens": 144129,
+      "cache_write_tokens": 289987,
+      "cache_read_tokens": 5607633,
+      "est_cost_usd": 11.3576,
+      "unpriced_requests": 0,
+      "models": {
+        "claude-fable-5-1": 39,
+        "claude-opus-5-5": 25
+      },
+      "efforts": {
+        "high": 39,
+        "medium": 22,
+        "low": 3
+      },
+      "output_basis": {
+        "reconciled": 64
+      }
+    }
+  },
+  "lane_model_mismatches": [],
+  "router_decisions": {
+    "decisions": 35,
+    "tasks": 35,
+    "dispatch_gate": {
+      "ALLOWED": 35
+    },
+    "overrides": 0,
+    "jev_errors": {},
+    "by_tool": {
+      "classify_task": 35
+    },
+    "actions": {},
+    "classes": {
+      "SMALL": 20,
+      "HIGH": 10,
+      "ESCALATE": 3,
+      "MEDIUM": 2
+    },
+    "initial_lanes": {
+      "OPUS_LOW": 12,
+      "OPUS_HIGH": 10,
+      "SONNET_MEDIUM": 8,
+      "FABLE_HIGH": 3,
+      "OPUS_MEDIUM": 2
+    },
+    "decided_by": {
+      "jev": 35
+    },
+    "avg_jev_confidence": 0.905,
+    "retention_hours": 24.0
+  },
+  "pricing_note": "API-equivalent estimate from policy.json pricing; not your actual bill on a subscription plan."
+}

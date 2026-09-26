@@ -1,0 +1,126 @@
+{
+  "window": {
+    "hours": 1.0,
+    "since": "2026-09-26T10:54:07+00:00",
+    "until": "2026-09-26T11:54:07+00:00",
+    "project_filter": "tinykv-baseline-20260926T115033Z-13891"
+  },
+  "totals": {
+    "requests": 10,
+    "runs": 1,
+    "input_tokens": 290,
+    "output_tokens": 16283,
+    "cache_write_tokens": 42848,
+    "cache_read_tokens": 397953,
+    "est_cost_usd": 1.7735,
+    "unpriced_requests": 0,
+    "models": {
+      "claude-fable-5-1": 10
+    },
+    "efforts": {
+      "high": 10
+    },
+    "output_basis": {
+      "reconciled": 10
+    },
+    "sessions": 1
+  },
+  "routed_share_of_cost": 0.0,
+  "by_model": {
+    "claude-fable-5-1": {
+      "requests": 10,
+      "runs": 1,
+      "input_tokens": 290,
+      "output_tokens": 16283,
+      "cache_write_tokens": 42848,
+      "cache_read_tokens": 397953,
+      "est_cost_usd": 1.7735,
+      "unpriced_requests": 0,
+      "models": {
+        "claude-fable-5-1": 10
+      },
+      "efforts": {
+        "high": 10
+      },
+      "output_basis": {
+        "reconciled": 10
+      }
+    }
+  },
+  "by_agent": {
+    "main session": {
+      "lane": "\u2014",
+      "requests": 10,
+      "runs": 1,
+      "input_tokens": 290,
+      "output_tokens": 16283,
+      "cache_write_tokens": 42848,
+      "cache_read_tokens": 397953,
+      "est_cost_usd": 1.7735,
+      "unpriced_requests": 0,
+      "models": {
+        "claude-fable-5-1": 10
+      },
+      "efforts": {
+        "high": 10
+      },
+      "output_basis": {
+        "reconciled": 10
+      }
+    }
+  },
+  "by_project": {
+    "/private/var/folders/rd/102wqq3j47d0dv3nfwbnp_xr0000gn/T/claude-router-bench/tinykv-baseline-20260926T115033Z-13891": {
+      "requests": 10,
+      "runs": 1,
+      "input_tokens": 290,
+      "output_tokens": 16283,
+      "cache_write_tokens": 42848,
+      "cache_read_tokens": 397953,
+      "est_cost_usd": 1.7735,
+      "unpriced_requests": 0,
+      "models": {
+        "claude-fable-5-1": 10
+      },
+      "efforts": {
+        "high": 10
+      },
+      "output_basis": {
+        "reconciled": 10
+      }
+    }
+  },
+  "lane_model_mismatches": [],
+  "router_decisions": {
+    "decisions": 35,
+    "tasks": 35,
+    "dispatch_gate": {
+      "ALLOWED": 35
+    },
+    "overrides": 0,
+    "jev_errors": {},
+    "by_tool": {
+      "classify_task": 35
+    },
+    "actions": {},
+    "classes": {
+      "SMALL": 20,
+      "HIGH": 10,
+      "ESCALATE": 3,
+      "MEDIUM": 2
+    },
+    "initial_lanes": {
+      "OPUS_LOW": 12,
+      "OPUS_HIGH": 10,
+      "SONNET_MEDIUM": 8,
+      "FABLE_HIGH": 3,
+      "OPUS_MEDIUM": 2
+    },
+    "decided_by": {
+      "jev": 35
+    },
+    "avg_jev_confidence": 0.905,
+    "retention_hours": 24.0
+  },
+  "pricing_note": "API-equivalent estimate from policy.json pricing; not your actual bill on a subscription plan."
+}

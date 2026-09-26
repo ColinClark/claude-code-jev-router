@@ -1,0 +1,1 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="0" skipped="0" tests="1" time="0.005" timestamp="2026-09-26T15:39:06.551051+02:00" hostname="Mac-Studio.local"><testcase classname="tests.test_placeholder" name="test_placeholder" time="0.000" /></testsuite></testsuites>

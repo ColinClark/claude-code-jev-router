@@ -1,0 +1,9 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.12.11, pytest-9.1.1, pluggy-1.6.0
+rootdir: /private/var/folders/rd/102wqq3j47d0dv3nfwbnp_xr0000gn/T/tmp.oRYuoK36iA
+configfile: pyproject.toml
+collected 10 items
+
+_acceptance/test_acceptance.py ..........                                [100%]
+
+============================== 10 passed in 4.14s ==============================

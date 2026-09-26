@@ -1,0 +1,20 @@
+{
+  "exit_code": 0,
+  "passed": 79,
+  "failed": 0,
+  "errors": 0,
+  "total": 79,
+  "tests": {
+    "test_random_queries_match_sqlite[0]": "PASSED",
+    "test_random_queries_match_sqlite[1]": "PASSED",
+    "test_random_queries_match_sqlite[2]": "PASSED",
+    "test_random_queries_match_sqlite[3]": "PASSED",
+    "test_random_queries_match_sqlite[4]": "PASSED",
+    "test_random_queries_match_sqlite[5]": "PASSED",
+    "test_random_queries_match_sqlite[6]": "PASSED",
+    "test_random_queries_match_sqlite[7]": "PASSED",
+    "test_random_queries_match_sqlite[8]": "PASSED",
+    "test_random_queries_match_sqlite[9]": "PASSED",
+    "test_implementation_does_not_use_sqlite": "PASSED"
+  }
+}

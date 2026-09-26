@@ -1,0 +1,10 @@
+{
+  "pytest": {
+    "exit_code": 5,
+    "passed": 0,
+    "failed": 0
+  },
+  "ruff": {
+    "exit_code": 0
+  }
+}

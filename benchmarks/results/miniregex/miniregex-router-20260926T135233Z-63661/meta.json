@@ -1,0 +1,15 @@
+{
+  "run_id": "miniregex-router-20260926T135233Z-63661",
+  "task": "miniregex",
+  "mode": "router",
+  "model": "claude-sonnet-5",
+  "effort": "medium",
+  "budget_usd": 30,
+  "claude_code": "2.1.283 (Claude Code)",
+  "router_policy": "1.5",
+  "session_id": "64374db2-5d8b-42f9-bd50-f451a47cbf67",
+  "started": 1790430753,
+  "ended": 1790434564,
+  "wall_seconds": 3811,
+  "claude_exit": 0
+}

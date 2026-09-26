@@ -1,0 +1,15 @@
+{
+  "run_id": "tinykv-router-20260926T132734Z-49675",
+  "task": "tinykv",
+  "mode": "router",
+  "model": "claude-sonnet-5",
+  "effort": "medium",
+  "budget_usd": 30,
+  "claude_code": "2.1.283 (Claude Code)",
+  "router_policy": "1.4",
+  "session_id": "dddb528f-8fe5-45ed-ba61-0c519b6ff82a",
+  "started": 1790429254,
+  "ended": 1790429582,
+  "wall_seconds": 328,
+  "claude_exit": 0
+}

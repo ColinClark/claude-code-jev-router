@@ -1,0 +1,1 @@
+{"tool":"classify_task","request_id":"req-whole-1","task_id":"a34cb645-ed6d-4c44-8497-0effe1a33d48:whole","policy_version":"1.6","evidence_fingerprint":null,"action":null,"class":"MEDIUM","route":{"lane":"OPUS_MEDIUM","model":"claude-opus-5-5","effort":"medium","agent":"implement-medium"},"confidence":0.32,"decided_by":"jev","ts":1790434721.675713}

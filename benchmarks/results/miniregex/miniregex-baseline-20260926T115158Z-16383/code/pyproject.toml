@@ -1,0 +1,29 @@
+[project]
+name = "miniregex"
+version = "0.1.0"
+description = "A regular-expression engine in pure Python, compatible with a subset of the re module"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = []
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/miniregex"]
+
+[dependency-groups]
+dev = ["pytest>=8", "ruff>=0.5"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# re warns about "possible nested set" for some fuzzed patterns; irrelevant here.
+filterwarnings = ["ignore:Possible:FutureWarning"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP"]

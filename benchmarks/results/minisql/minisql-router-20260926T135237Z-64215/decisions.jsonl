@@ -1,0 +1,2 @@
+{"tool":"classify_task","request_id":"b9d5-req-1","task_id":"b9d5caf5-64b1-43eb-a35a-aaefb9d42060:unit-1","policy_version":"1.5","evidence_fingerprint":null,"action":null,"class":"MEDIUM","route":{"lane":"OPUS_MEDIUM","model":"claude-opus-5-5","effort":"medium","agent":"implement-medium"},"confidence":0.31,"decided_by":"jev","ts":1790430776.548534}
+{"tool":"dispatch_gate","task_id":"b9d5caf5-64b1-43eb-a35a-aaefb9d42060:gate","action":"ALLOWED","route":{"lane":"OPUS_MEDIUM","agent":"implement-medium"},"request_id":"b9d5-req-1","decided_by":"gate","ts":1790430799.260402}

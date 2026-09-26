@@ -1,0 +1,15 @@
+{
+  "run_id": "miniregex-baseline-20260926T130904Z-36177",
+  "task": "miniregex",
+  "mode": "baseline",
+  "model": "claude-sonnet-5",
+  "effort": "medium",
+  "budget_usd": 30,
+  "claude_code": "2.1.283 (Claude Code)",
+  "router_policy": null,
+  "session_id": "7dbf5805-ebaa-4112-a6e9-d5d3a7f64761",
+  "started": 1790428144,
+  "ended": 1790428870,
+  "wall_seconds": 726,
+  "claude_exit": 0
+}

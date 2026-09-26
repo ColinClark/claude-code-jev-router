@@ -1,0 +1,18 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.12.11, pytest-9.1.1, pluggy-1.6.0 -- /private/var/folders/rd/102wqq3j47d0dv3nfwbnp_xr0000gn/T/tmp.yctNqxHrZ8/.venv/bin/python
+rootdir: /private/var/folders/rd/102wqq3j47d0dv3nfwbnp_xr0000gn/T/tmp.yctNqxHrZ8
+configfile: pyproject.toml
+collecting ... collected 10 items
+
+_acceptance/test_acceptance.py::test_crud_roundtrip PASSED               [ 10%]
+_acceptance/test_acceptance.py::test_missing_key_is_not_returned PASSED  [ 20%]
+_acceptance/test_acceptance.py::test_persistence_across_instances PASSED [ 30%]
+_acceptance/test_acceptance.py::test_ttl_expiry PASSED                   [ 40%]
+_acceptance/test_acceptance.py::test_expired_keys_dropped_on_next_write PASSED [ 50%]
+_acceptance/test_acceptance.py::test_atomic_writes_leave_no_temp_files PASSED [ 60%]
+_acceptance/test_acceptance.py::test_concurrent_writers_lose_no_updates PASSED [ 70%]
+_acceptance/test_acceptance.py::test_cli_set_get_del_keys PASSED         [ 80%]
+_acceptance/test_acceptance.py::test_cli_missing_key_exits_1 PASSED      [ 90%]
+_acceptance/test_acceptance.py::test_cli_ttl PASSED                      [100%]
+
+============================== 10 passed in 3.99s ==============================

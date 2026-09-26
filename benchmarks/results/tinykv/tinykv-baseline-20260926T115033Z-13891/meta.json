@@ -1,0 +1,15 @@
+{
+  "run_id": "tinykv-baseline-20260926T115033Z-13891",
+  "task": "tinykv",
+  "mode": "baseline",
+  "model": "claude-fable-5-1",
+  "effort": "high",
+  "budget_usd": 30,
+  "claude_code": "2.1.283 (Claude Code)",
+  "router_policy": null,
+  "session_id": "a566d058-f9e5-463b-abe8-8b1a08e630a4",
+  "started": 1790423434,
+  "ended": 1790423646,
+  "wall_seconds": 212,
+  "claude_exit": 0
+}

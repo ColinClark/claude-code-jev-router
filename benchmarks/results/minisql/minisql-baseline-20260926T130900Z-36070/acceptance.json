@@ -1,0 +1,20 @@
+{
+  "exit_code": 1,
+  "passed": 69,
+  "failed": 10,
+  "errors": 0,
+  "total": 79,
+  "tests": {
+    "test_random_queries_match_sqlite[0]": "FAILED",
+    "test_random_queries_match_sqlite[1]": "FAILED",
+    "test_random_queries_match_sqlite[2]": "FAILED",
+    "test_random_queries_match_sqlite[3]": "FAILED",
+    "test_random_queries_match_sqlite[4]": "FAILED",
+    "test_random_queries_match_sqlite[5]": "FAILED",
+    "test_random_queries_match_sqlite[6]": "PASSED",
+    "test_random_queries_match_sqlite[7]": "FAILED",
+    "test_random_queries_match_sqlite[8]": "FAILED",
+    "test_random_queries_match_sqlite[9]": "FAILED",
+    "test_implementation_does_not_use_sqlite": "PASSED"
+  }
+}

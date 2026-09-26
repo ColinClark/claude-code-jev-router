@@ -1,0 +1,26 @@
+[project]
+name = "minisql"
+version = "0.1.0"
+description = "An in-memory SQL database engine in pure Python"
+readme = "README.md"
+authors = [
+    { name = "Colin Clark", email = "colin@clark.ws" }
+]
+requires-python = ">=3.12"
+dependencies = []
+
+[build-system]
+requires = ["uv_build>=0.12.18,<0.13.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.6",
+]
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP"]

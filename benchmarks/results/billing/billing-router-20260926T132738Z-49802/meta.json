@@ -1,0 +1,15 @@
+{
+  "run_id": "billing-router-20260926T132738Z-49802",
+  "task": "billing",
+  "mode": "router",
+  "model": "claude-sonnet-5",
+  "effort": "medium",
+  "budget_usd": 30,
+  "claude_code": "2.1.283 (Claude Code)",
+  "router_policy": "1.4",
+  "session_id": "ba69517f-a86a-4f4d-a7a5-f4dd3d637fc9",
+  "started": 1790429258,
+  "ended": 1790429425,
+  "wall_seconds": 167,
+  "claude_exit": 0
+}

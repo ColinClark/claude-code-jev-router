@@ -1,0 +1,15 @@
+{
+  "run_id": "miniregex-router-20260926T135230Z-63595",
+  "task": "miniregex",
+  "mode": "router",
+  "model": "claude-opus-5-5",
+  "effort": "medium",
+  "budget_usd": 30,
+  "claude_code": "2.1.283 (Claude Code)",
+  "router_policy": "1.5",
+  "session_id": "a7e4ebe2-fa32-49f6-b3ec-62c1f6649a18",
+  "started": 1790430751,
+  "ended": 1790432761,
+  "wall_seconds": 2010,
+  "claude_exit": 0
+}

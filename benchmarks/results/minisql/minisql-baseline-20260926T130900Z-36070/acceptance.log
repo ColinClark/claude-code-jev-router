@@ -1,0 +1,488 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.12.11, pytest-9.1.1, pluggy-1.6.0 -- /private/var/folders/rd/102wqq3j47d0dv3nfwbnp_xr0000gn/T/tmp.qLhLJU1tlP/.venv/bin/python
+rootdir: /private/var/folders/rd/102wqq3j47d0dv3nfwbnp_xr0000gn/T/tmp.qLhLJU1tlP
+configfile: pyproject.toml
+collecting ... collected 79 items
+
+_acceptance/test_acceptance.py::test_matches_sqlite[SELECT id, name FROM emp ORDER BY id] PASSED [  1%]
+_acceptance/test_acceptance.py::test_matches_sqlite[SELECT * FROM dept ORDER BY id] PASSED [  2%]
+_acceptance/test_acceptance.py::test_matches_sqlite[SELECT id, bonus / 3, bonus % 4, -bonus FROM emp ORDER BY id] PASSED [  3%]
+_acceptance/test_acceptance.py::test_matches_sqlite[SELECT id, salary / 1000, salary * 2 FROM emp ORDER BY id] PASSED [  5%]
+_acceptance/test_acceptance.py::test_matches_sqlite[SELECT id, bonus / 0, salary / 0, bonus % 0 FROM emp ORDER BY id] PASSED [  6%]
+_acceptance/test_acceptance.py::test_matches_sqlite[SELECT id, -7 / 2, 7 / 2, -7 % 3, 7.5 % 2 FROM emp WHERE id = 1] FAILED [  7%]
+_acceptance/test_acceptance.py::test_matches_sqlite[SELECT id, 2 + 3 * 4, (2 + 3) * 4, 10 - 2 - 3 FROM emp WHERE id = 1] PASSED [  8%]
+_acceptance/test_acceptance.py::test_matches_sqlite[SELECT id, name || '-' || dept_id, name || NULL FROM emp ORDER BY id] PASSED [ 10%]
+_acceptance/test_acceptance.py::test_matches_sqlite[SELECT id, bonus + 1.5 FROM emp ORDER BY id] PASSED [ 11%]
+_acceptance/test_acceptance.py::test_matches_sqlite[SELECT id FROM emp WHERE bonus > 5 ORDER BY id] PASSED [ 12%]
+_acceptance/test_acceptance.py::test_matches_sqlite[SELECT id FROM emp WHERE NOT bonus > 5 ORDER BY id] PASSED [ 13%]
+_acceptance/test_acceptance.py::test_matches_sqlite[SELECT id FROM emp WHERE bonus = NULL] PASSED [ 15%]
+_acceptance/test_acceptance.py::test_matches_sqlite[SELECT id FROM emp WHERE bonus IS NULL ORDER BY id] PASSED [ 16%]
+_acceptance/test_acceptance.py::test_matches_sqlite[SELECT id FROM emp WHERE bonus IS NOT NULL AND salary IS NOT NULL ORDER BY id] PASSED [ 17%]
+_acceptance/test_acceptance.py::test_matches_sqlite[SELECT id FROM emp WHERE bonus > 5 OR salary > 100000 ORDER BY id] PASSED [ 18%]
+_acceptance/test_acceptance.py::test_matches_sqlite[SELECT id FROM emp WHERE bonus > 5 AND NOT salary > 100000 ORDER BY id] PASSED [ 20%]
+_acceptance/test_acceptance.py::test_matches_sqlite[SELECT id FROM emp WHERE dept_id IN (1, 3) ORDER BY id] PASSED [ 21%]
+_acceptance/test_acceptance.py::test_matches_sqlite[SELECT id FROM emp WHERE dept_id NOT IN (1, 3) ORDER BY id] PASSED [ 22%]
+_acceptance/test_acceptance.py::test_matches_sqlite[SELECT id FROM emp WHERE dept_id IN (1, NULL) ORDER BY id] PASSED [ 24%]
+_acceptance/test_acceptance.py::test_matches_sqlite[SELECT id FROM emp WHERE dept_id NOT IN (1, NULL) ORDER BY id] PASSED [ 25%]
+_acceptance/test_acceptance.py::test_matches_sqlite[SELECT id FROM emp WHERE salary BETWEEN 50000 AND 95000.5 ORDER BY id] PASSED [ 26%]
+_acceptance/test_acceptance.py::test_matches_sqlite[SELECT id FROM emp WHERE salary NOT BETWEEN 50000 AND 95000.5 ORDER BY id] PASSED [ 27%]
+_acceptance/test_acceptance.py::test_matches_sqlite[SELECT id FROM emp WHERE name LIKE 'a%' ORDER BY id] PASSED [ 29%]
+_acceptance/test_acceptance.py::test_matches_sqlite[SELECT id FROM emp WHERE name LIKE '%A%' ORDER BY id] PASSED [ 30%]
+_acceptance/test_acceptance.py::test_matches_sqlite[SELECT id FROM emp WHERE name LIKE '_o%' ORDER BY id] PASSED [ 31%]
+_acceptance/test_acceptance.py::test_matches_sqlite[SELECT id FROM emp WHERE name NOT LIKE '%e%' ORDER BY id] PASSED [ 32%]
+_acceptance/test_acceptance.py::test_matches_sqlite[SELECT id FROM emp WHERE id == 3 OR id <> 3 AND id != 4 ORDER BY id] PASSED [ 34%]
+_acceptance/test_acceptance.py::test_matches_sqlite[select Id, NAME from EMP where Bonus >= 7 order by ID desc] PASSED [ 35%]
+_acceptance/test_acceptance.py::test_matches_sqlite[SELECT id, bonus FROM emp ORDER BY bonus, id] PASSED [ 36%]
+_acceptance/test_acceptance.py::test_matches_sqlite[SELECT id, bonus FROM emp ORDER BY bonus DESC, id] PASSED [ 37%]
+_acceptance/test_acceptance.py::test_matches_sqlite[SELECT id, salary FROM emp ORDER BY salary DESC, id DESC] PASSED [ 39%]
+_acceptance/test_acceptance.py::test_matches_sqlite[SELECT name AS n, bonus * 2 AS b2 FROM emp ORDER BY b2, n] PASSED [ 40%]
+_acceptance/test_acceptance.py::test_matches_sqlite[SELECT id FROM emp ORDER BY salary - bonus, id] PASSED [ 41%]
+_acceptance/test_acceptance.py::test_matches_sqlite[SELECT id FROM emp ORDER BY id LIMIT 3] PASSED [ 43%]
+_acceptance/test_acceptance.py::test_matches_sqlite[SELECT id FROM emp ORDER BY id LIMIT 3 OFFSET 4] PASSED [ 44%]
+_acceptance/test_acceptance.py::test_matches_sqlite[SELECT id FROM emp ORDER BY id DESC LIMIT 100 OFFSET 8] PASSED [ 45%]
+_acceptance/test_acceptance.py::test_matches_sqlite[SELECT DISTINCT dept_id FROM emp ORDER BY dept_id] PASSED [ 46%]
+_acceptance/test_acceptance.py::test_matches_sqlite[SELECT DISTINCT bonus IS NULL, dept_id FROM emp] PASSED [ 48%]
+_acceptance/test_acceptance.py::test_matches_sqlite[SELECT COUNT(*), COUNT(bonus), COUNT(DISTINCT dept_id), SUM(bonus), AVG(bonus), MIN(bonus), MAX(bonus) FROM emp] PASSED [ 49%]
+_acceptance/test_acceptance.py::test_matches_sqlite[SELECT SUM(salary), AVG(salary), MIN(name), MAX(name) FROM emp] PASSED [ 50%]
+_acceptance/test_acceptance.py::test_matches_sqlite[SELECT COUNT(*), SUM(bonus), AVG(bonus), MIN(bonus), MAX(bonus) FROM emp WHERE id > 100] PASSED [ 51%]
+_acceptance/test_acceptance.py::test_matches_sqlite[SELECT dept_id, COUNT(*), SUM(bonus), AVG(salary) FROM emp GROUP BY dept_id ORDER BY dept_id] PASSED [ 53%]
+_acceptance/test_acceptance.py::test_matches_sqlite[SELECT dept_id, COUNT(*) FROM emp GROUP BY dept_id HAVING COUNT(*) > 1 ORDER BY dept_id] PASSED [ 54%]
+_acceptance/test_acceptance.py::test_matches_sqlite[SELECT dept_id, MAX(salary) - MIN(salary) AS spread FROM emp GROUP BY dept_id ORDER BY spread DESC, dept_id] PASSED [ 55%]
+_acceptance/test_acceptance.py::test_matches_sqlite[SELECT dept_id, SUM(bonus * 2) FROM emp WHERE salary > 40000 GROUP BY dept_id ORDER BY SUM(bonus * 2), dept_id] PASSED [ 56%]
+_acceptance/test_acceptance.py::test_matches_sqlite[SELECT bonus IS NULL, COUNT(*) FROM emp GROUP BY bonus IS NULL ORDER BY 1] PASSED [ 58%]
+_acceptance/test_acceptance.py::test_matches_sqlite[SELECT COUNT(DISTINCT title), COUNT(title) FROM proj] PASSED [ 59%]
+_acceptance/test_acceptance.py::test_matches_sqlite[SELECT e.name, d.name FROM emp e JOIN dept d ON e.dept_id = d.id ORDER BY e.id] PASSED [ 60%]
+_acceptance/test_acceptance.py::test_matches_sqlite[SELECT e.name, d.name FROM emp AS e INNER JOIN dept AS d ON e.dept_id = d.id WHERE d.budget > 100000 ORDER BY e.name] PASSED [ 62%]
+_acceptance/test_acceptance.py::test_matches_sqlite[SELECT e.id, d.name FROM emp e LEFT JOIN dept d ON e.dept_id = d.id ORDER BY e.id] PASSED [ 63%]
+_acceptance/test_acceptance.py::test_matches_sqlite[SELECT d.name, COUNT(e.id) FROM dept d LEFT JOIN emp e ON e.dept_id = d.id GROUP BY d.name ORDER BY d.name] PASSED [ 64%]
+_acceptance/test_acceptance.py::test_matches_sqlite[SELECT d.name, SUM(e.bonus), AVG(e.salary) FROM dept d LEFT OUTER JOIN emp e ON e.dept_id = d.id GROUP BY d.id ORDER BY d.id] PASSED [ 65%]
+_acceptance/test_acceptance.py::test_matches_sqlite[SELECT e.name, m.name FROM emp e LEFT JOIN emp m ON e.manager_id = m.id ORDER BY e.id] PASSED [ 67%]
+_acceptance/test_acceptance.py::test_matches_sqlite[SELECT e.name, p.title, d.name FROM emp e JOIN proj p ON p.emp_id = e.id JOIN dept d ON d.id = e.dept_id ORDER BY p.id] PASSED [ 68%]
+_acceptance/test_acceptance.py::test_matches_sqlite[SELECT p.title, SUM(p.hours), COUNT(*) FROM proj p LEFT JOIN emp e ON p.emp_id = e.id GROUP BY p.title HAVING SUM(p.hours) > 50 ORDER BY p.title] PASSED [ 69%]
+_acceptance/test_acceptance.py::test_matches_sqlite[SELECT e.id, p.id FROM emp e LEFT JOIN proj p ON p.emp_id = e.id AND p.hours > 50 ORDER BY e.id, p.id] PASSED [ 70%]
+_acceptance/test_acceptance.py::test_matches_sqlite[SELECT d.*, e.name FROM dept d JOIN emp e ON e.dept_id = d.id WHERE e.bonus > 8 ORDER BY e.id] PASSED [ 72%]
+_acceptance/test_acceptance.py::test_mutations_match_sqlite[UPDATE emp SET bonus = bonus + 1 WHERE dept_id = 1-SELECT id, bonus FROM emp ORDER BY id] PASSED [ 73%]
+_acceptance/test_acceptance.py::test_mutations_match_sqlite[UPDATE emp SET salary = salary * 1.5, bonus = 0 WHERE bonus IS NULL-SELECT * FROM emp ORDER BY id] PASSED [ 74%]
+_acceptance/test_acceptance.py::test_mutations_match_sqlite[UPDATE emp SET name = name || '!'-SELECT name FROM emp ORDER BY id] PASSED [ 75%]
+_acceptance/test_acceptance.py::test_mutations_match_sqlite[DELETE FROM emp WHERE salary < 60000-SELECT id FROM emp ORDER BY id] PASSED [ 77%]
+_acceptance/test_acceptance.py::test_mutations_match_sqlite[DELETE FROM proj-SELECT COUNT(*), SUM(hours) FROM proj] PASSED [ 78%]
+_acceptance/test_acceptance.py::test_mutations_match_sqlite[INSERT INTO emp (id, name) VALUES (11, 'Zed')-SELECT * FROM emp WHERE id > 9 ORDER BY id] PASSED [ 79%]
+_acceptance/test_acceptance.py::test_random_queries_match_sqlite[0] FAILED [ 81%]
+_acceptance/test_acceptance.py::test_random_queries_match_sqlite[1] FAILED [ 82%]
+_acceptance/test_acceptance.py::test_random_queries_match_sqlite[2] FAILED [ 83%]
+_acceptance/test_acceptance.py::test_random_queries_match_sqlite[3] FAILED [ 84%]
+_acceptance/test_acceptance.py::test_random_queries_match_sqlite[4] FAILED [ 86%]
+_acceptance/test_acceptance.py::test_random_queries_match_sqlite[5] FAILED [ 87%]
+_acceptance/test_acceptance.py::test_random_queries_match_sqlite[6] PASSED [ 88%]
+_acceptance/test_acceptance.py::test_random_queries_match_sqlite[7] FAILED [ 89%]
+_acceptance/test_acceptance.py::test_random_queries_match_sqlite[8] FAILED [ 91%]
+_acceptance/test_acceptance.py::test_random_queries_match_sqlite[9] FAILED [ 92%]
+_acceptance/test_acceptance.py::test_errors_raise_sqlerror[SELECT * FROM missing] PASSED [ 93%]
+_acceptance/test_acceptance.py::test_errors_raise_sqlerror[SELECT nope FROM emp] PASSED [ 94%]
+_acceptance/test_acceptance.py::test_errors_raise_sqlerror[SELECT id FROM emp e JOIN dept d ON e.dept_id = d.id] PASSED [ 96%]
+_acceptance/test_acceptance.py::test_errors_raise_sqlerror[SELEC id FROM emp] PASSED [ 97%]
+_acceptance/test_acceptance.py::test_errors_raise_sqlerror[SELECT id FROM emp WHERE] PASSED [ 98%]
+_acceptance/test_acceptance.py::test_implementation_does_not_use_sqlite PASSED [100%]
+
+=================================== FAILURES ===================================
+_ test_matches_sqlite[SELECT id, -7 / 2, 7 / 2, -7 % 3, 7.5 % 2 FROM emp WHERE id = 1] _
+
+sql = 'SELECT id, -7 / 2, 7 / 2, -7 % 3, 7.5 % 2 FROM emp WHERE id = 1'
+
+    @pytest.mark.parametrize("sql", QUERIES)
+    def test_matches_sqlite(sql):
+        mine, ref = fresh()
+>       check(mine, ref, sql)
+
+_acceptance/test_acceptance.py:135: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+mine = <minisql.engine.Database object at 0x1030864b0>
+ref = <sqlite3.Connection object at 0x1033874c0>
+sql = 'SELECT id, -7 / 2, 7 / 2, -7 % 3, 7.5 % 2 FROM emp WHERE id = 1'
+
+    def check(mine, ref, sql):
+        got = rows(mine.execute(sql))
+        want = rows(ref.execute(sql).fetchall())
+        if "ORDER BY" in sql.upper():
+            assert got == want, f"{sql}\n got: {got}\nwant: {want}"
+        else:
+>           assert Counter(got) == Counter(want), f"{sql}\n got: {sorted(got, key=repr)}\nwant: {sorted(want, key=repr)}"
+E           AssertionError: SELECT id, -7 / 2, 7 / 2, -7 % 3, 7.5 % 2 FROM emp WHERE id = 1
+E              got: [(('int', 1), ('int', -3), ('int', 3), ('int', -1), ('float', 1.5))]
+E             want: [(('int', 1), ('int', -3), ('int', 3), ('int', -1), ('float', 1.0))]
+E           assert Counter({(('i...t', 1.5)): 1}) == Counter({(('i...t', 1.0)): 1})
+E             
+E             Left contains 1 more item:
+E             {(('int', 1), ('int', -3), ('int', 3), ('int', -1), ('float', 1.5)): 1}
+E             Right contains 1 more item:
+E             {(('int', 1), ('int', -3), ('int', 3), ('int', -1), ('float', 1.0)): 1}
+E             
+E             Full diff:...
+E             
+E             ...Full output truncated (6 lines hidden), use '-vv' to show
+
+_acceptance/test_acceptance.py:59: AssertionError
+_____________________ test_random_queries_match_sqlite[0] ______________________
+
+batch = 0
+
+    @pytest.mark.parametrize("batch", range(10))
+    def test_random_queries_match_sqlite(batch):
+        rng = random.Random(1000 + batch)
+        mine, ref = fresh()
+        for _ in range(25):
+            sql = random_aggregate(rng) if rng.random() < 0.3 else random_select(rng)
+>           check(mine, ref, sql)
+
+_acceptance/test_acceptance.py:242: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+mine = <minisql.engine.Database object at 0x103080320>
+ref = <sqlite3.Connection object at 0x103385210>
+sql = 'SELECT dept_id, COUNT(*), MIN(name), COUNT(DISTINCT dept_id) FROM emp WHERE ((id IS NULL AND dept_id NOT IN (1, 3)) OR id < 7) GROUP BY dept_id ORDER BY 1'
+
+    def check(mine, ref, sql):
+        got = rows(mine.execute(sql))
+        want = rows(ref.execute(sql).fetchall())
+        if "ORDER BY" in sql.upper():
+>           assert got == want, f"{sql}\n got: {got}\nwant: {want}"
+E           AssertionError: SELECT dept_id, COUNT(*), MIN(name), COUNT(DISTINCT dept_id) FROM emp WHERE ((id IS NULL AND dept_id NOT IN (1, 3)) OR id < 7) GROUP BY dept_id ORDER BY 1
+E              got: [(('int', 1), ('int', 2), ('str', 'Alice'), ('int', 1)), (('int', 2), ('int', 2), ('str', 'Carol'), ('int', 1)), (('NoneType', None), ('int', 1), ('str', 'Eve'), ('int', 0)), (('int', 3), ('int', 1), ('str', 'Frank'), ('int', 1))]
+E             want: [(('NoneType', None), ('int', 1), ('str', 'Eve'), ('int', 0)), (('int', 1), ('int', 2), ('str', 'Alice'), ('int', 1)), (('int', 2), ('int', 2), ('str', 'Carol'), ('int', 1)), (('int', 3), ('int', 1), ('str', 'Frank'), ('int', 1))]
+E           assert [(('int', 1),..., ('int', 1))] == [(('NoneType'..., ('int', 1))]
+E             
+E             At index 0 diff: (('int', 1), ('int', 2), ('str', 'Alice'), ('int', 1)) != (('NoneType', None), ('int', 1), ('str', 'Eve'), ('int', 0))
+E             
+E             Full diff:
+E               [
+E             -     (
+E             -         (...
+E             
+E             ...Full output truncated (89 lines hidden), use '-vv' to show
+
+_acceptance/test_acceptance.py:57: AssertionError
+_____________________ test_random_queries_match_sqlite[1] ______________________
+
+batch = 1
+
+    @pytest.mark.parametrize("batch", range(10))
+    def test_random_queries_match_sqlite(batch):
+        rng = random.Random(1000 + batch)
+        mine, ref = fresh()
+        for _ in range(25):
+            sql = random_aggregate(rng) if rng.random() < 0.3 else random_select(rng)
+>           check(mine, ref, sql)
+
+_acceptance/test_acceptance.py:242: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+mine = <minisql.engine.Database object at 0x103081520>
+ref = <sqlite3.Connection object at 0x10346c400>
+sql = 'SELECT bonus IS NULL, AVG(salary), SUM(bonus), SUM(salary) / COUNT(*) FROM emp WHERE manager_id != 6 GROUP BY bonus IS NULL ORDER BY 1'
+
+    def check(mine, ref, sql):
+        got = rows(mine.execute(sql))
+        want = rows(ref.execute(sql).fetchall())
+        if "ORDER BY" in sql.upper():
+>           assert got == want, f"{sql}\n got: {got}\nwant: {want}"
+E           AssertionError: SELECT bonus IS NULL, AVG(salary), SUM(bonus), SUM(salary) / COUNT(*) FROM emp WHERE manager_id != 6 GROUP BY bonus IS NULL ORDER BY 1
+E              got: [(('int', 1), ('float', 95000.5), ('NoneType', None), ('float', 95000.5)), (('int', 0), ('float', 84400.05), ('int', 30), ('float', 70333.375))]
+E             want: [(('int', 0), ('float', 84400.05), ('int', 30), ('float', 70333.375)), (('int', 1), ('float', 95000.5), ('NoneType', None), ('float', 95000.5))]
+E           assert [(('int', 1),..., 70333.375))] == [(('int', 0),...t', 95000.5))]
+E             
+E             At index 0 diff: (('int', 1), ('float', 95000.5), ('NoneType', None), ('float', 95000.5)) != (('int', 0), ('float', 84400.05), ('int', 30), ('float', 70333.375))
+E             
+E             Full diff:
+E               [
+E             +     (
+E             +         (...
+E             
+E             ...Full output truncated (53 lines hidden), use '-vv' to show
+
+_acceptance/test_acceptance.py:57: AssertionError
+_____________________ test_random_queries_match_sqlite[2] ______________________
+
+batch = 2
+
+    @pytest.mark.parametrize("batch", range(10))
+    def test_random_queries_match_sqlite(batch):
+        rng = random.Random(1000 + batch)
+        mine, ref = fresh()
+        for _ in range(25):
+            sql = random_aggregate(rng) if rng.random() < 0.3 else random_select(rng)
+>           check(mine, ref, sql)
+
+_acceptance/test_acceptance.py:242: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+mine = <minisql.engine.Database object at 0x1033bc440>
+ref = <sqlite3.Connection object at 0x10346c9a0>
+sql = 'SELECT salary > 60000, MIN(name), AVG(salary), COUNT(bonus) FROM emp WHERE salary IN (95000.5, 45000) GROUP BY salary > 60000 ORDER BY 1'
+
+    def check(mine, ref, sql):
+        got = rows(mine.execute(sql))
+        want = rows(ref.execute(sql).fetchall())
+        if "ORDER BY" in sql.upper():
+>           assert got == want, f"{sql}\n got: {got}\nwant: {want}"
+E           AssertionError: SELECT salary > 60000, MIN(name), AVG(salary), COUNT(bonus) FROM emp WHERE salary IN (95000.5, 45000) GROUP BY salary > 60000 ORDER BY 1
+E              got: [(('int', 1), ('str', 'bob'), ('float', 95000.5), ('int', 0)), (('int', 0), ('str', 'Heidi'), ('float', 45000.0), ('int', 0))]
+E             want: [(('int', 0), ('str', 'Heidi'), ('float', 45000.0), ('int', 0)), (('int', 1), ('str', 'bob'), ('float', 95000.5), ('int', 0))]
+E           assert [(('int', 1),..., ('int', 0))] == [(('int', 0),..., ('int', 0))]
+E             
+E             At index 0 diff: (('int', 1), ('str', 'bob'), ('float', 95000.5), ('int', 0)) != (('int', 0), ('str', 'Heidi'), ('float', 45000.0), ('int', 0))
+E             
+E             Full diff:
+E               [
+E             +     (
+E             +         (...
+E             
+E             ...Full output truncated (53 lines hidden), use '-vv' to show
+
+_acceptance/test_acceptance.py:57: AssertionError
+_____________________ test_random_queries_match_sqlite[3] ______________________
+
+batch = 3
+
+    @pytest.mark.parametrize("batch", range(10))
+    def test_random_queries_match_sqlite(batch):
+        rng = random.Random(1000 + batch)
+        mine, ref = fresh()
+        for _ in range(25):
+            sql = random_aggregate(rng) if rng.random() < 0.3 else random_select(rng)
+>           check(mine, ref, sql)
+
+_acceptance/test_acceptance.py:242: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+mine = <minisql.engine.Database object at 0x103437fe0>
+ref = <sqlite3.Connection object at 0x10346ce50>
+sql = 'SELECT salary > 60000, SUM(bonus), MIN(name), COUNT(DISTINCT dept_id) FROM emp WHERE NOT (salary IN (200000, 95000.5)) GROUP BY salary > 60000 ORDER BY 1'
+
+    def check(mine, ref, sql):
+        got = rows(mine.execute(sql))
+        want = rows(ref.execute(sql).fetchall())
+        if "ORDER BY" in sql.upper():
+>           assert got == want, f"{sql}\n got: {got}\nwant: {want}"
+E           AssertionError: SELECT salary > 60000, SUM(bonus), MIN(name), COUNT(DISTINCT dept_id) FROM emp WHERE NOT (salary IN (200000, 95000.5)) GROUP BY salary > 60000 ORDER BY 1
+E              got: [(('int', 1), ('int', 35), ('str', 'Alice'), ('int', 2)), (('int', 0), ('int', 2), ('str', 'Eve'), ('int', 2))]
+E             want: [(('int', 0), ('int', 2), ('str', 'Eve'), ('int', 2)), (('int', 1), ('int', 35), ('str', 'Alice'), ('int', 2))]
+E           assert [(('int', 1),..., ('int', 2))] == [(('int', 0),..., ('int', 2))]
+E             
+E             At index 0 diff: (('int', 1), ('int', 35), ('str', 'Alice'), ('int', 2)) != (('int', 0), ('int', 2), ('str', 'Eve'), ('int', 2))
+E             
+E             Full diff:
+E               [
+E             +     (
+E             +         (...
+E             
+E             ...Full output truncated (53 lines hidden), use '-vv' to show
+
+_acceptance/test_acceptance.py:57: AssertionError
+_____________________ test_random_queries_match_sqlite[4] ______________________
+
+batch = 4
+
+    @pytest.mark.parametrize("batch", range(10))
+    def test_random_queries_match_sqlite(batch):
+        rng = random.Random(1000 + batch)
+        mine, ref = fresh()
+        for _ in range(25):
+            sql = random_aggregate(rng) if rng.random() < 0.3 else random_select(rng)
+>           check(mine, ref, sql)
+
+_acceptance/test_acceptance.py:242: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+mine = <minisql.engine.Database object at 0x1034a85c0>
+ref = <sqlite3.Connection object at 0x10346d4e0>
+sql = 'SELECT dept_id, COUNT(DISTINCT dept_id), SUM(bonus), MIN(name) FROM emp WHERE NOT (manager_id IS NOT NULL) GROUP BY dept_id ORDER BY 1'
+
+    def check(mine, ref, sql):
+        got = rows(mine.execute(sql))
+        want = rows(ref.execute(sql).fetchall())
+        if "ORDER BY" in sql.upper():
+>           assert got == want, f"{sql}\n got: {got}\nwant: {want}"
+E           AssertionError: SELECT dept_id, COUNT(DISTINCT dept_id), SUM(bonus), MIN(name) FROM emp WHERE NOT (manager_id IS NOT NULL) GROUP BY dept_id ORDER BY 1
+E              got: [(('int', 1), ('int', 1), ('int', 10), ('str', 'Alice')), (('int', 0), ('int', 1), ('int', 2), ('str', 'Judy'))]
+E             want: [(('int', 0), ('int', 1), ('int', 2), ('str', 'Judy')), (('int', 1), ('int', 1), ('int', 10), ('str', 'Alice'))]
+E           assert [(('int', 1),...tr', 'Judy'))] == [(('int', 0),...r', 'Alice'))]
+E             
+E             At index 0 diff: (('int', 1), ('int', 1), ('int', 10), ('str', 'Alice')) != (('int', 0), ('int', 1), ('int', 2), ('str', 'Judy'))
+E             
+E             Full diff:
+E               [
+E             +     (
+E             +         (...
+E             
+E             ...Full output truncated (53 lines hidden), use '-vv' to show
+
+_acceptance/test_acceptance.py:57: AssertionError
+_____________________ test_random_queries_match_sqlite[5] ______________________
+
+batch = 5
+
+    @pytest.mark.parametrize("batch", range(10))
+    def test_random_queries_match_sqlite(batch):
+        rng = random.Random(1000 + batch)
+        mine, ref = fresh()
+        for _ in range(25):
+            sql = random_aggregate(rng) if rng.random() < 0.3 else random_select(rng)
+>           check(mine, ref, sql)
+
+_acceptance/test_acceptance.py:242: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+mine = <minisql.engine.Database object at 0x1034ab5f0>
+ref = <sqlite3.Connection object at 0x10346da80>
+sql = "SELECT dept_id, SUM(salary) / COUNT(*), SUM(bonus), COUNT(DISTINCT dept_id) FROM emp WHERE name LIKE '%' GROUP BY dept_id ORDER BY 1"
+
+    def check(mine, ref, sql):
+        got = rows(mine.execute(sql))
+        want = rows(ref.execute(sql).fetchall())
+        if "ORDER BY" in sql.upper():
+>           assert got == want, f"{sql}\n got: {got}\nwant: {want}"
+E           AssertionError: SELECT dept_id, SUM(salary) / COUNT(*), SUM(bonus), COUNT(DISTINCT dept_id) FROM emp WHERE name LIKE '%' GROUP BY dept_id ORDER BY 1
+E              got: [(('int', 1), ('float', 121666.916667), ('int', 22), ('int', 1)), (('int', 2), ('float', 74000.0), ('int', 13), ('int', 1)), (('NoneType', None), ('float', 50000.0), ('int', 0), ('int', 0)), (('int', 3), ('float', 22500.0), ('int', 5), ('int', 1)), (('int', 0), ('float', 30000.0), ('int', 2), ('int', 1))]
+E             want: [(('NoneType', None), ('float', 50000.0), ('int', 0), ('int', 0)), (('int', 0), ('float', 30000.0), ('int', 2), ('int', 1)), (('int', 1), ('float', 121666.916667), ('int', 22), ('int', 1)), (('int', 2), ('float', 74000.0), ('int', 13), ('int', 1)), (('int', 3), ('float', 22500.0), ('int', 5), ('int', 1))]
+E           assert [(('int', 1),..., ('int', 1))] == [(('NoneType'..., ('int', 1))]
+E             
+E             At index 0 diff: (('int', 1), ('float', 121666.916667), ('int', 22), ('int', 1)) != (('NoneType', None), ('float', 50000.0), ('int', 0), ('int', 0))
+E             
+E             Full diff:
+E               [
+E             -     (
+E             -         (...
+E             
+E             ...Full output truncated (125 lines hidden), use '-vv' to show
+
+_acceptance/test_acceptance.py:57: AssertionError
+_____________________ test_random_queries_match_sqlite[7] ______________________
+
+batch = 7
+
+    @pytest.mark.parametrize("batch", range(10))
+    def test_random_queries_match_sqlite(batch):
+        rng = random.Random(1000 + batch)
+        mine, ref = fresh()
+        for _ in range(25):
+            sql = random_aggregate(rng) if rng.random() < 0.3 else random_select(rng)
+>           check(mine, ref, sql)
+
+_acceptance/test_acceptance.py:242: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+mine = <minisql.engine.Database object at 0x1034aa810>
+ref = <sqlite3.Connection object at 0x1033854e0>
+sql = "SELECT manager_id, MIN(name), MAX(bonus), COUNT(DISTINCT dept_id) FROM emp WHERE name NOT LIKE '%a%' GROUP BY manager_id ORDER BY 1"
+
+    def check(mine, ref, sql):
+        got = rows(mine.execute(sql))
+        want = rows(ref.execute(sql).fetchall())
+        if "ORDER BY" in sql.upper():
+>           assert got == want, f"{sql}\n got: {got}\nwant: {want}"
+E           AssertionError: SELECT manager_id, MIN(name), MAX(bonus), COUNT(DISTINCT dept_id) FROM emp WHERE name NOT LIKE '%a%' GROUP BY manager_id ORDER BY 1
+E              got: [(('int', 1), ('str', 'Eve'), ('int', 0), ('int', 1)), (('int', 6), ('str', 'Heidi'), ('NoneType', None), ('int', 1)), (('NoneType', None), ('str', 'Judy'), ('int', 2), ('int', 1))]
+E             want: [(('NoneType', None), ('str', 'Judy'), ('int', 2), ('int', 1)), (('int', 1), ('str', 'Eve'), ('int', 0), ('int', 1)), (('int', 6), ('str', 'Heidi'), ('NoneType', None), ('int', 1))]
+E           assert [(('int', 1),..., ('int', 1))] == [(('NoneType'..., ('int', 1))]
+E             
+E             At index 0 diff: (('int', 1), ('str', 'Eve'), ('int', 0), ('int', 1)) != (('NoneType', None), ('str', 'Judy'), ('int', 2), ('int', 1))
+E             
+E             Full diff:
+E               [
+E             -     (
+E             -         (...
+E             
+E             ...Full output truncated (71 lines hidden), use '-vv' to show
+
+_acceptance/test_acceptance.py:57: AssertionError
+_____________________ test_random_queries_match_sqlite[8] ______________________
+
+batch = 8
+
+    @pytest.mark.parametrize("batch", range(10))
+    def test_random_queries_match_sqlite(batch):
+        rng = random.Random(1000 + batch)
+        mine, ref = fresh()
+        for _ in range(25):
+            sql = random_aggregate(rng) if rng.random() < 0.3 else random_select(rng)
+>           check(mine, ref, sql)
+
+_acceptance/test_acceptance.py:242: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+mine = <minisql.engine.Database object at 0x1034a94c0>
+ref = <sqlite3.Connection object at 0x1033867a0>
+sql = 'SELECT manager_id, MIN(name), COUNT(*), COUNT(bonus) FROM emp WHERE bonus BETWEEN 0 AND 9 GROUP BY manager_id ORDER BY 1'
+
+    def check(mine, ref, sql):
+        got = rows(mine.execute(sql))
+        want = rows(ref.execute(sql).fetchall())
+        if "ORDER BY" in sql.upper():
+>           assert got == want, f"{sql}\n got: {got}\nwant: {want}"
+E           AssertionError: SELECT manager_id, MIN(name), COUNT(*), COUNT(bonus) FROM emp WHERE bonus BETWEEN 0 AND 9 GROUP BY manager_id ORDER BY 1
+E              got: [(('int', 1), ('str', 'Carol'), ('int', 2), ('int', 2)), (('int', 3), ('str', 'Frank'), ('int', 2), ('int', 2)), (('NoneType', None), ('str', 'Judy'), ('int', 1), ('int', 1))]
+E             want: [(('NoneType', None), ('str', 'Judy'), ('int', 1), ('int', 1)), (('int', 1), ('str', 'Carol'), ('int', 2), ('int', 2)), (('int', 3), ('str', 'Frank'), ('int', 2), ('int', 2))]
+E           assert [(('int', 1),..., ('int', 1))] == [(('NoneType'..., ('int', 2))]
+E             
+E             At index 0 diff: (('int', 1), ('str', 'Carol'), ('int', 2), ('int', 2)) != (('NoneType', None), ('str', 'Judy'), ('int', 1), ('int', 1))
+E             
+E             Full diff:
+E               [
+E             -     (
+E             -         (...
+E             
+E             ...Full output truncated (71 lines hidden), use '-vv' to show
+
+_acceptance/test_acceptance.py:57: AssertionError
+_____________________ test_random_queries_match_sqlite[9] ______________________
+
+batch = 9
+
+    @pytest.mark.parametrize("batch", range(10))
+    def test_random_queries_match_sqlite(batch):
+        rng = random.Random(1000 + batch)
+        mine, ref = fresh()
+        for _ in range(25):
+            sql = random_aggregate(rng) if rng.random() < 0.3 else random_select(rng)
+>           check(mine, ref, sql)
+
+_acceptance/test_acceptance.py:242: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+mine = <minisql.engine.Database object at 0x1033bff50>
+ref = <sqlite3.Connection object at 0x10346d3f0>
+sql = 'SELECT salary > 60000, COUNT(bonus), MAX(bonus), MIN(name) FROM emp WHERE dept_id != 2 GROUP BY salary > 60000 HAVING COUNT(*) > 1 ORDER BY 1'
+
+    def check(mine, ref, sql):
+        got = rows(mine.execute(sql))
+        want = rows(ref.execute(sql).fetchall())
+        if "ORDER BY" in sql.upper():
+>           assert got == want, f"{sql}\n got: {got}\nwant: {want}"
+E           AssertionError: SELECT salary > 60000, COUNT(bonus), MAX(bonus), MIN(name) FROM emp WHERE dept_id != 2 GROUP BY salary > 60000 HAVING COUNT(*) > 1 ORDER BY 1
+E              got: [(('int', 1), ('int', 2), ('int', 12), ('str', 'Alice')), (('int', 0), ('int', 1), ('int', 2), ('str', 'Heidi'))]
+E             want: [(('int', 0), ('int', 1), ('int', 2), ('str', 'Heidi')), (('int', 1), ('int', 2), ('int', 12), ('str', 'Alice'))]
+E           assert [(('int', 1),...r', 'Heidi'))] == [(('int', 0),...r', 'Alice'))]
+E             
+E             At index 0 diff: (('int', 1), ('int', 2), ('int', 12), ('str', 'Alice')) != (('int', 0), ('int', 1), ('int', 2), ('str', 'Heidi'))
+E             
+E             Full diff:
+E               [
+E             +     (
+E             +         (...
+E             
+E             ...Full output truncated (53 lines hidden), use '-vv' to show
+
+_acceptance/test_acceptance.py:57: AssertionError
+=========================== short test summary info ============================
+FAILED _acceptance/test_acceptance.py::test_matches_sqlite[SELECT id, -7 / 2, 7 / 2, -7 % 3, 7.5 % 2 FROM emp WHERE id = 1]
+FAILED _acceptance/test_acceptance.py::test_random_queries_match_sqlite[0] - ...
+FAILED _acceptance/test_acceptance.py::test_random_queries_match_sqlite[1] - ...
+FAILED _acceptance/test_acceptance.py::test_random_queries_match_sqlite[2] - ...
+FAILED _acceptance/test_acceptance.py::test_random_queries_match_sqlite[3] - ...
+FAILED _acceptance/test_acceptance.py::test_random_queries_match_sqlite[4] - ...
+FAILED _acceptance/test_acceptance.py::test_random_queries_match_sqlite[5] - ...
+FAILED _acceptance/test_acceptance.py::test_random_queries_match_sqlite[7] - ...
+FAILED _acceptance/test_acceptance.py::test_random_queries_match_sqlite[8] - ...
+FAILED _acceptance/test_acceptance.py::test_random_queries_match_sqlite[9] - ...
+======================== 10 failed, 69 passed in 0.14s =========================

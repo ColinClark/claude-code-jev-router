@@ -1,0 +1,19 @@
+[project]
+name = "minisql"
+version = "0.1.0"
+description = "In-memory SQL engine with SQLite-compatible semantics"
+authors = [
+    { name = "Colin Clark", email = "colin.clark@statista.com" }
+]
+requires-python = ">=3.12"
+dependencies = []
+
+[build-system]
+requires = ["uv_build>=0.12.18,<0.13.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+    "ruff>=0.16.9",
+]

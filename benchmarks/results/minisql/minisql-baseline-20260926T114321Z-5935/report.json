@@ -1,0 +1,126 @@
+{
+  "window": {
+    "hours": 1.0,
+    "since": "2026-09-26T11:06:41+00:00",
+    "until": "2026-09-26T12:06:41+00:00",
+    "project_filter": "minisql-baseline-20260926T114321Z-5935"
+  },
+  "totals": {
+    "requests": 63,
+    "runs": 1,
+    "input_tokens": 126,
+    "output_tokens": 127239,
+    "cache_write_tokens": 182856,
+    "cache_read_tokens": 8003274,
+    "est_cost_usd": 5.6088,
+    "unpriced_requests": 0,
+    "models": {
+      "claude-opus-5-5": 63
+    },
+    "efforts": {
+      "medium": 63
+    },
+    "output_basis": {
+      "reconciled": 63
+    },
+    "sessions": 1
+  },
+  "routed_share_of_cost": 0.0,
+  "by_model": {
+    "claude-opus-5-5": {
+      "requests": 63,
+      "runs": 1,
+      "input_tokens": 126,
+      "output_tokens": 127239,
+      "cache_write_tokens": 182856,
+      "cache_read_tokens": 8003274,
+      "est_cost_usd": 5.6088,
+      "unpriced_requests": 0,
+      "models": {
+        "claude-opus-5-5": 63
+      },
+      "efforts": {
+        "medium": 63
+      },
+      "output_basis": {
+        "reconciled": 63
+      }
+    }
+  },
+  "by_agent": {
+    "main session": {
+      "lane": "\u2014",
+      "requests": 63,
+      "runs": 1,
+      "input_tokens": 126,
+      "output_tokens": 127239,
+      "cache_write_tokens": 182856,
+      "cache_read_tokens": 8003274,
+      "est_cost_usd": 5.6088,
+      "unpriced_requests": 0,
+      "models": {
+        "claude-opus-5-5": 63
+      },
+      "efforts": {
+        "medium": 63
+      },
+      "output_basis": {
+        "reconciled": 63
+      }
+    }
+  },
+  "by_project": {
+    "/private/var/folders/rd/102wqq3j47d0dv3nfwbnp_xr0000gn/T/claude-router-bench/minisql-baseline-20260926T114321Z-5935": {
+      "requests": 63,
+      "runs": 1,
+      "input_tokens": 126,
+      "output_tokens": 127239,
+      "cache_write_tokens": 182856,
+      "cache_read_tokens": 8003274,
+      "est_cost_usd": 5.6088,
+      "unpriced_requests": 0,
+      "models": {
+        "claude-opus-5-5": 63
+      },
+      "efforts": {
+        "medium": 63
+      },
+      "output_basis": {
+        "reconciled": 63
+      }
+    }
+  },
+  "lane_model_mismatches": [],
+  "router_decisions": {
+    "decisions": 35,
+    "tasks": 35,
+    "dispatch_gate": {
+      "ALLOWED": 35
+    },
+    "overrides": 0,
+    "jev_errors": {},
+    "by_tool": {
+      "classify_task": 35
+    },
+    "actions": {},
+    "classes": {
+      "SMALL": 20,
+      "HIGH": 10,
+      "ESCALATE": 3,
+      "MEDIUM": 2
+    },
+    "initial_lanes": {
+      "OPUS_LOW": 12,
+      "OPUS_HIGH": 10,
+      "SONNET_MEDIUM": 8,
+      "FABLE_HIGH": 3,
+      "OPUS_MEDIUM": 2
+    },
+    "decided_by": {
+      "jev": 35
+    },
+    "avg_jev_confidence": 0.905,
+    "retention_hours": 24.0
+  },
+  "pricing_note": "API-equivalent estimate from policy.json pricing; not your actual bill on a subscription plan."
+}

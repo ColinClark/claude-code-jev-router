@@ -1,0 +1,15 @@
+{
+  "run_id": "billing-baseline-20260926T115038Z-14007",
+  "task": "billing",
+  "mode": "baseline",
+  "model": "claude-fable-5-1",
+  "effort": "high",
+  "budget_usd": 30,
+  "claude_code": "2.1.283 (Claude Code)",
+  "router_policy": null,
+  "session_id": "615aaebc-2e8a-4b8b-bb8a-86678d507a26",
+  "started": 1790423438,
+  "ended": 1790423539,
+  "wall_seconds": 101,
+  "claude_exit": 0
+}

@@ -1,0 +1,12 @@
+[1m[91mE501[0m[1m Line too long (106 > 100)[0m
+   [1m[94m--> [0msrc/miniregex/_engine.py:210:101
+    [1m[94m|[0m
+[1m[94m208[0m [1m[94m|[0m                 op = REPEAT_ONE if greedy else MIN_REPEAT_ONE
+[1m[94m209[0m [1m[94m|[0m                 unit = _unit(body[0])
+[1m[94m210[0m [1m[94m|[0m                 code.append((op, lo, hi, _char_test(unit), (unit[0], unit[1] if len(unit) > 1 else None)))
+    [1m[94m|[0m                                                                                                     [1m[91m^^^^^^[0m
+[1m[94m211[0m [1m[94m|[0m             else:
+[1m[94m212[0m [1m[94m|[0m                 at = len(code)
+    [1m[94m|[0m
+
+Found 1 error.

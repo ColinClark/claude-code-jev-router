@@ -1,0 +1,145 @@
+{
+  "window": {
+    "hours": 1.0,
+    "since": "2026-09-26T12:49:35+00:00",
+    "until": "2026-09-26T13:49:35+00:00",
+    "project_filter": "miniregex-router-20260926T131109Z-39209"
+  },
+  "totals": {
+    "requests": 47,
+    "runs": 2,
+    "input_tokens": 94,
+    "output_tokens": 79762,
+    "cache_write_tokens": 374474,
+    "cache_read_tokens": 2685685,
+    "est_cost_usd": 4.13,
+    "unpriced_requests": 0,
+    "models": {
+      "claude-opus-5-5": 47
+    },
+    "efforts": {
+      "medium": 47
+    },
+    "output_basis": {
+      "reconciled": 47
+    },
+    "sessions": 1
+  },
+  "routed_share_of_cost": 0.8317,
+  "by_model": {
+    "claude-opus-5-5": {
+      "requests": 47,
+      "runs": 2,
+      "input_tokens": 94,
+      "output_tokens": 79762,
+      "cache_write_tokens": 374474,
+      "cache_read_tokens": 2685685,
+      "est_cost_usd": 4.13,
+      "unpriced_requests": 0,
+      "models": {
+        "claude-opus-5-5": 47
+      },
+      "efforts": {
+        "medium": 47
+      },
+      "output_basis": {
+        "reconciled": 47
+      }
+    }
+  },
+  "by_agent": {
+    "implement-medium": {
+      "lane": "OPUS_MEDIUM",
+      "requests": 35,
+      "runs": 1,
+      "input_tokens": 70,
+      "output_tokens": 66484,
+      "cache_write_tokens": 332834,
+      "cache_read_tokens": 2204230,
+      "est_cost_usd": 3.435,
+      "unpriced_requests": 0,
+      "models": {
+        "claude-opus-5-5": 35
+      },
+      "efforts": {
+        "medium": 35
+      },
+      "output_basis": {
+        "reconciled": 35
+      }
+    },
+    "main session": {
+      "lane": "\u2014",
+      "requests": 12,
+      "runs": 1,
+      "input_tokens": 24,
+      "output_tokens": 13278,
+      "cache_write_tokens": 41640,
+      "cache_read_tokens": 481455,
+      "est_cost_usd": 0.6951,
+      "unpriced_requests": 0,
+      "models": {
+        "claude-opus-5-5": 12
+      },
+      "efforts": {
+        "medium": 12
+      },
+      "output_basis": {
+        "reconciled": 12
+      }
+    }
+  },
+  "by_project": {
+    "/private/var/folders/rd/102wqq3j47d0dv3nfwbnp_xr0000gn/T/claude-router-bench/miniregex-router-20260926T131109Z-39209": {
+      "requests": 47,
+      "runs": 2,
+      "input_tokens": 94,
+      "output_tokens": 79762,
+      "cache_write_tokens": 374474,
+      "cache_read_tokens": 2685685,
+      "est_cost_usd": 4.13,
+      "unpriced_requests": 0,
+      "models": {
+        "claude-opus-5-5": 47
+      },
+      "efforts": {
+        "medium": 47
+      },
+      "output_basis": {
+        "reconciled": 47
+      }
+    }
+  },
+  "lane_model_mismatches": [],
+  "router_decisions": {
+    "decisions": 23,
+    "tasks": 22,
+    "dispatch_gate": {
+      "ALLOWED": 21
+    },
+    "overrides": 0,
+    "jev_errors": {},
+    "by_tool": {
+      "classify_task": 22,
+      "assess_progress": 1
+    },
+    "actions": {
+      "COMPLETE": 1
+    },
+    "classes": {
+      "MEDIUM": 12,
+      "SMALL": 7,
+      "HIGH": 3
+    },
+    "initial_lanes": {
+      "OPUS_MEDIUM": 15,
+      "OPUS_LOW": 7
+    },
+    "decided_by": {
+      "jev": 23
+    },
+    "avg_jev_confidence": 0.636,
+    "retention_hours": 24.0
+  },
+  "pricing_note": "API-equivalent estimate from policy.json pricing; not your actual bill on a subscription plan."
+}

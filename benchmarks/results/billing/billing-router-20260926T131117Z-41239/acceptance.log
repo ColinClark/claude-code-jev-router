@@ -1,0 +1,33 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.12.11, pytest-9.1.1, pluggy-1.6.0 -- /private/var/folders/rd/102wqq3j47d0dv3nfwbnp_xr0000gn/T/tmp.Ys0Z8kIZM0/.venv/bin/python
+rootdir: /private/var/folders/rd/102wqq3j47d0dv3nfwbnp_xr0000gn/T/tmp.Ys0Z8kIZM0
+configfile: pyproject.toml
+collecting ... collected 25 items
+
+_acceptance/test_acceptance.py::test_bug1_round_half_up[0.125-0.13] PASSED [  4%]
+_acceptance/test_acceptance.py::test_bug1_round_half_up[2.675-2.68] PASSED [  8%]
+_acceptance/test_acceptance.py::test_bug1_round_half_up[-0.125--0.13] PASSED [ 12%]
+_acceptance/test_acceptance.py::test_bug1_round_half_up[0.124-0.12] PASSED [ 16%]
+_acceptance/test_acceptance.py::test_bug1_round_half_up[1.005-1.01] PASSED [ 20%]
+_acceptance/test_acceptance.py::test_bug1_reported_invoice_subtotal PASSED [ 24%]
+_acceptance/test_acceptance.py::test_bug2_coupon_capped_at_subtotal PASSED [ 28%]
+_acceptance/test_acceptance.py::test_bug2_coupon_capped_after_percent_discount PASSED [ 32%]
+_acceptance/test_acceptance.py::test_bug3_tax_rounded_per_line PASSED    [ 36%]
+_acceptance/test_acceptance.py::test_bug3_tax_per_line_with_discount PASSED [ 40%]
+_acceptance/test_acceptance.py::test_bug4_proration_days_remaining PASSED [ 44%]
+_acceptance/test_acceptance.py::test_bug4_change_on_first_day_is_full_period PASSED [ 48%]
+_acceptance/test_acceptance.py::test_bug5_period_end[start0-end0] PASSED [ 52%]
+_acceptance/test_acceptance.py::test_bug5_period_end[start1-end1] PASSED [ 56%]
+_acceptance/test_acceptance.py::test_bug5_period_end[start2-end2] PASSED [ 60%]
+_acceptance/test_acceptance.py::test_bug5_period_end[start3-end3] PASSED [ 64%]
+_acceptance/test_acceptance.py::test_bug5_period_end[start4-end4] PASSED [ 68%]
+_acceptance/test_acceptance.py::test_bug5_period_end[start5-end5] PASSED [ 72%]
+_acceptance/test_acceptance.py::test_bug5_reported_jan31_upgrade PASSED  [ 76%]
+_acceptance/test_acceptance.py::test_bug6_convert_exact[2.01-0.5-1.01] PASSED [ 80%]
+_acceptance/test_acceptance.py::test_bug6_convert_exact[0.125-1-0.13] PASSED [ 84%]
+_acceptance/test_acceptance.py::test_bug6_convert_exact[10.00-1.2345-12.35] PASSED [ 88%]
+_acceptance/test_acceptance.py::test_bug6_convert_exact[1.15-3-3.45] PASSED [ 92%]
+_acceptance/test_acceptance.py::test_regression_simple_invoice PASSED    [ 96%]
+_acceptance/test_acceptance.py::test_regression_outside_period_raises PASSED [100%]
+
+============================== 25 passed in 0.02s ==============================

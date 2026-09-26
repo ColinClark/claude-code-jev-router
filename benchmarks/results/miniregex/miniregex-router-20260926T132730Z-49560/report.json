@@ -1,0 +1,189 @@
+{
+  "window": {
+    "hours": 1.0,
+    "since": "2026-09-26T12:39:06+00:00",
+    "until": "2026-09-26T13:39:06+00:00",
+    "project_filter": "miniregex-router-20260926T132730Z-49560"
+  },
+  "totals": {
+    "requests": 37,
+    "runs": 3,
+    "input_tokens": 74,
+    "output_tokens": 46091,
+    "cache_write_tokens": 103215,
+    "cache_read_tokens": 1496827,
+    "est_cost_usd": 1.6274,
+    "unpriced_requests": 0,
+    "models": {
+      "claude-opus-5-5": 24,
+      "claude-sonnet-5": 13
+    },
+    "efforts": {
+      "medium": 34,
+      "low": 3
+    },
+    "output_basis": {
+      "reconciled": 37
+    },
+    "sessions": 1
+  },
+  "routed_share_of_cost": 0.7752,
+  "by_model": {
+    "claude-opus-5-5": {
+      "requests": 24,
+      "runs": 2,
+      "input_tokens": 48,
+      "output_tokens": 39254,
+      "cache_write_tokens": 61439,
+      "cache_read_tokens": 845594,
+      "est_cost_usd": 1.2616,
+      "unpriced_requests": 0,
+      "models": {
+        "claude-opus-5-5": 24
+      },
+      "efforts": {
+        "medium": 21,
+        "low": 3
+      },
+      "output_basis": {
+        "reconciled": 24
+      }
+    },
+    "claude-sonnet-5": {
+      "requests": 13,
+      "runs": 1,
+      "input_tokens": 26,
+      "output_tokens": 6837,
+      "cache_write_tokens": 41776,
+      "cache_read_tokens": 651233,
+      "est_cost_usd": 0.3658,
+      "unpriced_requests": 0,
+      "models": {
+        "claude-sonnet-5": 13
+      },
+      "efforts": {
+        "medium": 13
+      },
+      "output_basis": {
+        "reconciled": 13
+      }
+    }
+  },
+  "by_agent": {
+    "implement-medium": {
+      "lane": "OPUS_MEDIUM",
+      "requests": 21,
+      "runs": 1,
+      "input_tokens": 42,
+      "output_tokens": 36522,
+      "cache_write_tokens": 50604,
+      "cache_read_tokens": 826692,
+      "est_cost_usd": 1.149,
+      "unpriced_requests": 0,
+      "models": {
+        "claude-opus-5-5": 21
+      },
+      "efforts": {
+        "medium": 21
+      },
+      "output_basis": {
+        "reconciled": 21
+      }
+    },
+    "main session": {
+      "lane": "\u2014",
+      "requests": 13,
+      "runs": 1,
+      "input_tokens": 26,
+      "output_tokens": 6837,
+      "cache_write_tokens": 41776,
+      "cache_read_tokens": 651233,
+      "est_cost_usd": 0.3658,
+      "unpriced_requests": 0,
+      "models": {
+        "claude-sonnet-5": 13
+      },
+      "efforts": {
+        "medium": 13
+      },
+      "output_basis": {
+        "reconciled": 13
+      }
+    },
+    "implement-small": {
+      "lane": "OPUS_LOW",
+      "requests": 3,
+      "runs": 1,
+      "input_tokens": 6,
+      "output_tokens": 2732,
+      "cache_write_tokens": 10835,
+      "cache_read_tokens": 18902,
+      "est_cost_usd": 0.1126,
+      "unpriced_requests": 0,
+      "models": {
+        "claude-opus-5-5": 3
+      },
+      "efforts": {
+        "low": 3
+      },
+      "output_basis": {
+        "reconciled": 3
+      }
+    }
+  },
+  "by_project": {
+    "/private/var/folders/rd/102wqq3j47d0dv3nfwbnp_xr0000gn/T/claude-router-bench/miniregex-router-20260926T132730Z-49560": {
+      "requests": 37,
+      "runs": 3,
+      "input_tokens": 74,
+      "output_tokens": 46091,
+      "cache_write_tokens": 103215,
+      "cache_read_tokens": 1496827,
+      "est_cost_usd": 1.6274,
+      "unpriced_requests": 0,
+      "models": {
+        "claude-opus-5-5": 24,
+        "claude-sonnet-5": 13
+      },
+      "efforts": {
+        "medium": 34,
+        "low": 3
+      },
+      "output_basis": {
+        "reconciled": 37
+      }
+    }
+  },
+  "lane_model_mismatches": [],
+  "router_decisions": {
+    "decisions": 23,
+    "tasks": 22,
+    "dispatch_gate": {
+      "ALLOWED": 21
+    },
+    "overrides": 0,
+    "jev_errors": {},
+    "by_tool": {
+      "classify_task": 22,
+      "assess_progress": 1
+    },
+    "actions": {
+      "COMPLETE": 1
+    },
+    "classes": {
+      "MEDIUM": 12,
+      "SMALL": 7,
+      "HIGH": 3
+    },
+    "initial_lanes": {
+      "OPUS_MEDIUM": 15,
+      "OPUS_LOW": 7
+    },
+    "decided_by": {
+      "jev": 23
+    },
+    "avg_jev_confidence": 0.636,
+    "retention_hours": 24.0
+  },
+  "pricing_note": "API-equivalent estimate from policy.json pricing; not your actual bill on a subscription plan."
+}

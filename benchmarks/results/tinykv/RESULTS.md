@@ -6,6 +6,8 @@ Prompt: [`benchmarks/tinykv/prompt.md`](../../tinykv/prompt.md). Every run start
 
 | Run | Configuration | Success | Hidden acceptance | Own tests | Wall time | Turns | Output tokens | Cost | Models |
 | --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | --- |
+| `tinykv-baseline-20260926T115033Z-13891` | baseline · fable-5-1/high | ✅ | 10/10 | 29 passed | 3.5 min | 10 | 16,283 | $1.77 | claude-fable-5-1 |
+| `tinykv-baseline-20260926T115035Z-13953` | baseline · fable-5-1/high | ✅ | 10/10 | 26 passed | 2.5 min | 9 | 12,347 | $1.45 | claude-fable-5-1 |
 | `tinykv-baseline-20260926T111237Z-35755` | baseline · opus-5-5/medium | ✅ | 10/10 | 24 passed | 2.3 min | 11 | 12,213 | $0.59 | claude-opus-5-5 |
 | `tinykv-baseline-20260926T111240Z-36085` | baseline · opus-5-5/medium | ✅ | 10/10 | 17 passed | 1.7 min | 9 | 8,512 | $0.46 | claude-opus-5-5 |
 | `tinykv-baseline-20260926T112529Z-51448` | baseline · sonnet-5/medium | ✅ | 10/10 | 18 passed | 2.2 min | 21 | 12,539 | $0.49 | claude-sonnet-5 |
@@ -14,20 +16,40 @@ Prompt: [`benchmarks/tinykv/prompt.md`](../../tinykv/prompt.md). Every run start
 | `tinykv-router-20260926T111242Z-36347` | router · opus-5-5/medium · policy 1.1 | ✅ | 10/10 | 44 passed | 4.9 min | 18 | 26,834 | $1.26 | claude-opus-5-5 |
 | `tinykv-router-20260926T112531Z-51521` | router · opus-5-5/medium · policy 1.2 | ✅ | 10/10 | 45 passed | 6.1 min | 17 | 32,453 | $1.36 | claude-opus-5-5, claude-sonnet-5 |
 | `tinykv-router-20260926T112537Z-51725` | router · opus-5-5/medium · policy 1.2 | ✅ | 10/10 | 45 passed | 5.8 min | 19 | 31,452 | $1.40 | claude-opus-5-5, claude-sonnet-5 |
+| `tinykv-router-20260926T131111Z-39530` | router · opus-5-5/medium · policy 1.4 | ✅ | 10/10 | 16 passed | 2.2 min | 10 | 12,906 | $0.73 | claude-opus-5-5 |
+| `tinykv-router-20260926T131113Z-39793` | router · opus-5-5/medium · policy 1.4 | ✅ | 10/10 | 23 passed | 2.5 min | 9 | 13,970 | $0.75 | claude-opus-5-5 |
+| `tinykv-router-20260926T145831Z-81901` | router · opus-5-5/medium · policy 1.6 | ✅ | 10/10 | 18 passed | 1.6 min | 9 | 9,149 | $0.53 | claude-opus-5-5 |
+| `tinykv-router-20260926T145833Z-82454` | router · opus-5-5/medium · policy 1.6 | ✅ | 10/10 | 21 passed | 1.8 min | 17 | 10,277 | $0.62 | claude-opus-5-5 |
 | `tinykv-router-20260926T112527Z-51368` | router · sonnet-5/medium · policy 1.2 | ✅ | 10/10 | 53 passed | 8.7 min | 3 | 46,698 | $1.78 | claude-opus-5-5, claude-sonnet-5 |
 | `tinykv-router-20260926T112533Z-51585` | router · sonnet-5/medium · policy 1.2 | ✅ | 10/10 | 55 passed | 10.8 min | 2 | 44,518 | $1.59 | claude-opus-5-5, claude-sonnet-5 |
+| `tinykv-router-20260926T132734Z-49675` | router · sonnet-5/medium · policy 1.4 | ✅ | 10/10 | 45 passed | 5.5 min | 27 | 29,160 | $1.15 | claude-opus-5-5, claude-sonnet-5 |
+| `tinykv-router-20260926T132736Z-49742` | router · sonnet-5/medium · policy 1.4 | ✅ | 10/10 | 29 passed | 4.3 min | 2 | 21,966 | $0.92 | claude-opus-5-5, claude-sonnet-5 |
 
 ## Averages by configuration
 
 | Configuration | Runs | Success | Hidden acceptance (all passed) | Mean cost | Mean wall time | Mean output tokens |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| baseline · fable-5-1/high | 2 | 2/2 | 2/2 | $1.61 | 3.0 min | 14,315 |
 | baseline · opus-5-5/medium | 2 | 2/2 | 2/2 | $0.53 | 2.0 min | 10,362 |
 | baseline · sonnet-5/medium | 2 | 2/2 | 2/2 | $0.53 | 2.8 min | 13,866 |
 | router · opus-5-5/medium · policy 1.1 | 2 | 2/2 | 2/2 | $1.24 | 4.7 min | 26,090 |
 | router · opus-5-5/medium · policy 1.2 | 2 | 2/2 | 2/2 | $1.38 | 6.0 min | 31,952 |
+| router · opus-5-5/medium · policy 1.4 | 2 | 2/2 | 2/2 | $0.74 | 2.4 min | 13,438 |
+| router · opus-5-5/medium · policy 1.6 | 2 | 2/2 | 2/2 | $0.57 | 1.7 min | 9,713 |
 | router · sonnet-5/medium · policy 1.2 | 2 | 2/2 | 2/2 | $1.69 | 9.8 min | 45,608 |
+| router · sonnet-5/medium · policy 1.4 | 2 | 2/2 | 2/2 | $1.04 | 4.9 min | 25,563 |
 
 ## Where the work ran
+
+**`tinykv-baseline-20260926T115033Z-13891`** (baseline · fable-5-1/high)
+
+- Lanes and agents: main session 10 req, 100% of cost
+- Router decisions: none
+
+**`tinykv-baseline-20260926T115035Z-13953`** (baseline · fable-5-1/high)
+
+- Lanes and agents: main session 9 req, 100% of cost
+- Router decisions: none
 
 **`tinykv-baseline-20260926T111237Z-35755`** (baseline · opus-5-5/medium)
 
@@ -69,6 +91,26 @@ Prompt: [`benchmarks/tinykv/prompt.md`](../../tinykv/prompt.md). Every run start
 - Lanes and agents: main session 16 req, 55% of cost; OPUS_HIGH (implement-high) 8 req, 29% of cost; SONNET_MEDIUM (implement-small) 18 req, 16% of cost
 - Router decisions: `unit-1` → SMALL/SONNET_MEDIUM (1.0), `unit-2` → HIGH/OPUS_HIGH (0.87), `unit-3` → SMALL/SONNET_MEDIUM (0.88); gate allowed 3, blocked 0
 
+**`tinykv-router-20260926T131111Z-39530`** (router · opus-5-5/medium · policy 1.4)
+
+- Lanes and agents: main session 8 req, 62% of cost; OPUS_MEDIUM (implement-medium) 6 req, 38% of cost
+- Router decisions: `unit-1` → MEDIUM/OPUS_MEDIUM (0.78); gate allowed 1, blocked 0
+
+**`tinykv-router-20260926T131113Z-39793`** (router · opus-5-5/medium · policy 1.4)
+
+- Lanes and agents: main session 7 req, 61% of cost; OPUS_MEDIUM (implement-medium) 7 req, 39% of cost
+- Router decisions: `unit-1` → MEDIUM/OPUS_MEDIUM (0.75); gate allowed 1, blocked 0
+
+**`tinykv-router-20260926T145831Z-81901`** (router · opus-5-5/medium · policy 1.6)
+
+- Lanes and agents: main session 8 req, 100% of cost
+- Router decisions: `whole` → MEDIUM/OPUS_MEDIUM (0.74); gate allowed 0, blocked 0
+
+**`tinykv-router-20260926T145833Z-82454`** (router · opus-5-5/medium · policy 1.6)
+
+- Lanes and agents: main session 12 req, 100% of cost
+- Router decisions: `whole` → MEDIUM/OPUS_MEDIUM (0.69); gate allowed 0, blocked 0
+
 **`tinykv-router-20260926T112527Z-51368`** (router · sonnet-5/medium · policy 1.2)
 
 - Lanes and agents: OPUS_HIGH (implement-high) 23 req, 52% of cost; main session 19 req, 35% of cost; SONNET_MEDIUM (implement-small) 19 req, 12% of cost
@@ -78,5 +120,15 @@ Prompt: [`benchmarks/tinykv/prompt.md`](../../tinykv/prompt.md). Every run start
 
 - Lanes and agents: OPUS_HIGH (implement-high) 18 req, 45% of cost; main session 22 req, 41% of cost; SONNET_MEDIUM (implement-small) 19 req, 14% of cost
 - Router decisions: `unit-1` → SMALL/SONNET_MEDIUM (1.0), `unit-2` → HIGH/OPUS_HIGH (0.83), `unit-3` → SMALL/SONNET_MEDIUM (1.0), `unit-4` → HIGH/OPUS_HIGH (0.94); gate allowed 4, blocked 0
+
+**`tinykv-router-20260926T132734Z-49675`** (router · sonnet-5/medium · policy 1.4)
+
+- Lanes and agents: main session 19 req, 54% of cost; OPUS_MEDIUM (implement-medium) 10 req, 33% of cost; OPUS_LOW (implement-small) 7 req, 14% of cost
+- Router decisions: `unit-scaffold` → SMALL/OPUS_LOW (1.0), `unit-store` → HIGH/OPUS_MEDIUM (0.89), `unit-cli` → SMALL/OPUS_LOW (1.0), `unit-tests` → HIGH/OPUS_MEDIUM (0.85); gate allowed 4, blocked 0
+
+**`tinykv-router-20260926T132736Z-49742`** (router · sonnet-5/medium · policy 1.4)
+
+- Lanes and agents: OPUS_MEDIUM (implement-medium) 14 req, 53% of cost; main session 14 req, 47% of cost
+- Router decisions: `unit-1-library-cli` → MEDIUM/OPUS_MEDIUM (0.7), `unit-2-tests` → HIGH/OPUS_MEDIUM (0.8); gate allowed 2, blocked 0
 
 Generated code for each run is under `results/tinykv/<run>/code/`.

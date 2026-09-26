@@ -1,0 +1,15 @@
+{
+  "run_id": "minisql-baseline-20260926T130900Z-36070",
+  "task": "minisql",
+  "mode": "baseline",
+  "model": "claude-sonnet-5",
+  "effort": "medium",
+  "budget_usd": 30,
+  "claude_code": "2.1.283 (Claude Code)",
+  "router_policy": null,
+  "session_id": "2e41ee07-56ae-4746-b1e3-3a2b46fe077b",
+  "started": 1790428140,
+  "ended": 1790428906,
+  "wall_seconds": 766,
+  "claude_exit": 0
+}
