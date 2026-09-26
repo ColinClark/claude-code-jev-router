@@ -1,0 +1,167 @@
+{
+  "window": {
+    "hours": 1.0,
+    "since": "2026-09-26T10:17:36+00:00",
+    "until": "2026-09-26T11:17:36+00:00",
+    "project_filter": "tinykv-router-20260926T111242Z-36347"
+  },
+  "totals": {
+    "requests": 29,
+    "runs": 4,
+    "input_tokens": 58,
+    "output_tokens": 26834,
+    "cache_write_tokens": 85773,
+    "cache_read_tokens": 765202,
+    "est_cost_usd": 1.2576,
+    "unpriced_requests": 0,
+    "models": {
+      "claude-opus-5-5": 29
+    },
+    "efforts": {
+      "medium": 13,
+      "high": 9,
+      "low": 7
+    },
+    "output_basis": {
+      "reconciled": 29
+    },
+    "sessions": 1
+  },
+  "routed_share_of_cost": 0.4737,
+  "by_model": {
+    "claude-opus-5-5": {
+      "requests": 29,
+      "runs": 4,
+      "input_tokens": 58,
+      "output_tokens": 26834,
+      "cache_write_tokens": 85773,
+      "cache_read_tokens": 765202,
+      "est_cost_usd": 1.2576,
+      "unpriced_requests": 0,
+      "models": {
+        "claude-opus-5-5": 29
+      },
+      "efforts": {
+        "medium": 13,
+        "high": 9,
+        "low": 7
+      },
+      "output_basis": {
+        "reconciled": 29
+      }
+    }
+  },
+  "by_agent": {
+    "main session": {
+      "lane": "\u2014",
+      "requests": 13,
+      "runs": 1,
+      "input_tokens": 26,
+      "output_tokens": 9004,
+      "cache_write_tokens": 46267,
+      "cache_read_tokens": 557856,
+      "est_cost_usd": 0.6619,
+      "unpriced_requests": 0,
+      "models": {
+        "claude-opus-5-5": 13
+      },
+      "efforts": {
+        "medium": 13
+      },
+      "output_basis": {
+        "reconciled": 13
+      }
+    },
+    "implement-high": {
+      "lane": "OPUS_HIGH",
+      "requests": 9,
+      "runs": 1,
+      "input_tokens": 18,
+      "output_tokens": 13118,
+      "cache_write_tokens": 23030,
+      "cache_read_tokens": 150332,
+      "est_cost_usd": 0.4076,
+      "unpriced_requests": 0,
+      "models": {
+        "claude-opus-5-5": 9
+      },
+      "efforts": {
+        "high": 9
+      },
+      "output_basis": {
+        "reconciled": 9
+      }
+    },
+    "implement-small": {
+      "lane": "OPUS_LOW",
+      "requests": 7,
+      "runs": 2,
+      "input_tokens": 14,
+      "output_tokens": 4712,
+      "cache_write_tokens": 16476,
+      "cache_read_tokens": 57014,
+      "est_cost_usd": 0.1881,
+      "unpriced_requests": 0,
+      "models": {
+        "claude-opus-5-5": 7
+      },
+      "efforts": {
+        "low": 7
+      },
+      "output_basis": {
+        "reconciled": 7
+      }
+    }
+  },
+  "by_project": {
+    "/private/var/folders/rd/102wqq3j47d0dv3nfwbnp_xr0000gn/T/claude-router-bench/tinykv-router-20260926T111242Z-36347": {
+      "requests": 29,
+      "runs": 4,
+      "input_tokens": 58,
+      "output_tokens": 26834,
+      "cache_write_tokens": 85773,
+      "cache_read_tokens": 765202,
+      "est_cost_usd": 1.2576,
+      "unpriced_requests": 0,
+      "models": {
+        "claude-opus-5-5": 29
+      },
+      "efforts": {
+        "medium": 13,
+        "high": 9,
+        "low": 7
+      },
+      "output_basis": {
+        "reconciled": 29
+      }
+    }
+  },
+  "lane_model_mismatches": [],
+  "router_decisions": {
+    "decisions": 9,
+    "tasks": 9,
+    "dispatch_gate": {
+      "ALLOWED": 9
+    },
+    "overrides": 0,
+    "jev_errors": {},
+    "by_tool": {
+      "classify_task": 9
+    },
+    "actions": {},
+    "classes": {
+      "SMALL": 6,
+      "HIGH": 3
+    },
+    "initial_lanes": {
+      "OPUS_LOW": 6,
+      "OPUS_HIGH": 3
+    },
+    "decided_by": {
+      "jev": 9
+    },
+    "avg_jev_confidence": 0.944,
+    "retention_hours": 24.0
+  },
+  "pricing_note": "API-equivalent estimate from policy.json pricing; not your actual bill on a subscription plan."
+}

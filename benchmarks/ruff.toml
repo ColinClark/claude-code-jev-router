@@ -1,0 +1,7 @@
+# Lint settings for the benchmark harness and acceptance suites (pytest asserts are expected here).
+line-length = 120
+target-version = "py312"
+extend-exclude = ["results"]  # generated code from benchmark runs is kept exactly as produced
+
+[lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF"]

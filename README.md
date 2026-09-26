@@ -17,6 +17,7 @@ Once installed, it applies to **every project** on your machine unless you turn 
 ## Contents
 
 - [How it works](#how-it-works)
+- [Benchmark: router vs. no router](#benchmark-router-vs-no-router)
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
 - [Verifying the install](#verifying-the-install)
@@ -41,6 +42,9 @@ your request
     ▼
 orchestrator (your main Claude session)
     │  writes acceptance criteria, allowed paths and check commands, then records a baseline
+    │  splits the work into units and asks jev.classify_task for every unit
+    │
+    ├──► dispatch gate (PreToolUse hook) ──► blocks any implement-* dispatch without a routing decision
     │
     ├──► lane subagent (by exact name) ──► implements one bounded unit, returns evidence
     │       implement-small · implement-medium · implement-high · implement-escalated · implement-extreme
@@ -75,6 +79,29 @@ cheaper lane.
 
 **What doesn't get routed:** questions, explanations, planning, reviews, and trivial one-file edits. The
 main session handles these directly, so they cost no subagent overhead.
+
+---
+
+## Benchmark: router vs. no router
+
+[`benchmarks/`](benchmarks/) runs the same task headlessly with the router off (`CLAUDE_ROUTER=off`) and
+on, using the same model (Opus 5.5 at medium effort), budget and seed repo. It grades every result with a
+hidden acceptance suite that neither mode sees. First task, **tinykv** (a key-value store with TTL, atomic
+writes, multi-process locking and a CLI), 2 runs per mode:
+
+| | baseline (router off) | router |
+| --- | ---: | ---: |
+| Hidden acceptance (10 tests) | 10/10 in both runs | 10/10 in both runs |
+| Tests the run wrote itself | 17–24 | 40–44 |
+| Mean cost (API-equivalent) | **$0.53** | $1.24 |
+| Mean wall time | **2.0 min** | 4.7 min |
+| Routing | one session did everything | scaffold → OPUS_LOW · store with locking → OPUS_HIGH · CLI → OPUS_LOW (every unit classified by Jev, 3/3 dispatches allowed by the gate) |
+
+**Takeaway:** on a small, well-specified task, both modes are correct, and the router's orchestration
+overhead (splitting, per-unit contracts, independent verification) makes it cost about 2.3× more. It also
+had no cheaper model to route to, because every lane here is Opus 5.5. The router is aimed at hard, long or
+mixed-price work, which this task doesn't exercise. See [`benchmarks/README.md`](benchmarks/README.md) for
+the full analysis, per-run results, generated code, and how to run or add tasks.
 
 ---
 
@@ -133,7 +160,7 @@ The installer is **idempotent**, so running it again is safe. It makes only thes
 | 3 | Copies the 7 lane agents. It **never overwrites** an agent file it didn't install; it warns and skips instead | `~/.claude/agents/` |
 | 3b | Installs the `/router-report` skill, with the same no-overwrite rule | `~/.claude/skills/router-report/` |
 | 4 | Adds a marked block importing the policy. Your existing content is untouched | `~/.claude/CLAUDE.md` |
-| 5 | Adds a `SessionStart` hook, after writing a timestamped backup (`settings.json.bak-router-*`) | `~/.claude/settings.json` |
+| 5 | Adds a `SessionStart` hook (router on/off and session id) and a `PreToolUse` [dispatch gate](#the-dispatch-gate) on the Agent tool, after writing a timestamped backup (`settings.json.bak-router-*`) | `~/.claude/settings.json` |
 | 6 | Registers the `jev` **stdio MCP server** at user scope | `claude mcp add -s user jev -- ~/.claude/router/jev-mcp/.venv/bin/jev-router-mcp` |
 | 7 | Starts the MCP server once and lists its tools to confirm it works | — |
 
@@ -186,8 +213,10 @@ the main session:
 1. **Writes a contract:** acceptance criteria (`A1`, `A2`, …), allowed paths, and the repo's own check
    commands (tests, typecheck, lint, build). It records a baseline, so failures that existed before the
    change stay visible.
-2. **Routes the work.** Obvious cases are routed directly. Otherwise it asks `jev.classify_task`, then
-   dispatches the smallest useful unit to a lane agent.
+2. **Splits and routes the work.** It splits the task into the smallest useful units, keeping parts that
+   belong in different lanes (such as scaffolding versus concurrency-safe persistence) separate. It calls
+   `jev.classify_task` for **every** unit and dispatches exactly the agent in the returned route. The
+   [dispatch gate](#the-dispatch-gate) enforces this.
 3. **Collects evidence itself** with `router-evidence` after every worker cycle, instead of trusting the
    worker's report.
 4. **Decides:** continue, retry (only with a new hypothesis), verify, escalate, complete, or blocked.
@@ -199,10 +228,32 @@ the main session:
 | You say | Effect |
 | --- | --- |
 | "no router" / "work directly" | Skip orchestration for this task |
-| "use implement-high for this" | Force a lane |
+| "use implement-high for this" | Force a lane. Recorded with `record_override`, so the gate allows it and the report shows it |
 | "security-sensitive" | Floors classification at `OPUS_HIGH` |
 | "you may use FABLE_XHIGH" | Allows the top lane; otherwise it's reached only by explicit escalation |
 | "budget: 3 cycles" | Tightens the cycle limit for this task |
+
+### The dispatch gate
+
+Prompt instructions alone don't guarantee routing. In an early test the orchestrator skipped Jev,
+judging the class "obvious", and sent a concurrency-heavy task to one MEDIUM worker. Jev would have split
+it and routed the locking part to HIGH. So a `PreToolUse` hook (`router-gate`) runs before every Agent
+tool call:
+
+- **Gated agents:** a dispatch to an implementation lane (`implement-small` … `implement-extreme`) is
+  allowed only if this session has an unused routing decision in the decision log that names that agent.
+  That can be `classify_task`, `decide_escalation` (ESCALATE, DEESCALATE or KEEP), or `record_override`.
+- **One per dispatch:** each decision allows one dispatch.
+- **Session-scoped:** the SessionStart hook prints the session id, and decisions use
+  `"<session id>:<unit>"` as their `task_id`.
+- **When blocked,** Claude sees the steps to follow: load the jev tools with ToolSearch, call
+  `classify_task`, then dispatch the agent in the returned route.
+- **Never gated:** `lookup`, `research`, other agents such as Explore or general-purpose, and anything
+  when the router is off.
+- **Degraded mode:** if Jev returns `JEV_UNAVAILABLE`, the gate allows dispatches for 15 minutes, so an
+  outage falls back to local routing rules instead of blocking work.
+- **Logged:** every allow, block and degraded pass goes to the decision log, and `/router-report` shows
+  the counts.
 
 ### Running the evidence collector yourself
 
@@ -306,8 +357,10 @@ far back as Claude Code keeps transcripts.
 ## Turning it off
 
 Opting out disables the **orchestration policy**: the SessionStart hook tells Claude to ignore it and work
-directly. The lane agents and `jev` tools stay installed but go unused. Opt-outs take effect when a
-session starts, so open a new session or run `/clear` after changing one.
+directly. The [dispatch gate](#the-dispatch-gate) also stands down, so the lane agents can be dispatched
+freely. The lane agents and `jev` tools stay installed but go unused. The policy switch takes effect when
+a session starts, so open a new session or run `/clear` after changing one. The gate checks the opt-out
+on every dispatch.
 
 ### For a single task
 
@@ -476,6 +529,18 @@ uv run python scripts/smoke_live.py "$PWD/.venv/bin/jev-router-mcp"
   per summary), an unknown lane, or a `policy_version` mismatch after a policy change. The `reason` field
   names the problem.
 
+### A dispatch is blocked with "Router gate: dispatching '…' needs a routing decision"
+The gate is working as designed. Claude should follow the steps in the message: load the jev tools,
+classify the unit with a `task_id` starting with the session id, then dispatch the agent in the returned
+route. If it keeps getting blocked:
+- **Wrong task_id prefix:** the `task_id` must start with the "Router session id" from the SessionStart
+  context.
+- **Wrong agent:** the dispatched agent must be the one in the decision's `route`. The block message lists
+  the agents this session's unused decisions point to.
+- **Reused decision:** each decision allows one dispatch, so a second unit needs its own classification.
+- **Forced lane:** to use a lane you asked for, Claude records it with `record_override`.
+- **Temporary workaround:** set `CLAUDE_ROUTER=off` or add `.claude/router.off`.
+
 ### Claude doesn't route; it just does the work
 - Open a new session. The hook and policy only load at session start.
 - Ask *"Is the smart router active?"*. If Claude says DISABLED, look for `CLAUDE_ROUTER=off` in your
@@ -519,6 +584,7 @@ see [the model access entry](#a-lane-fails-with-a-model-access-error).
 | Tool | Purpose | Possible outputs |
 | --- | --- | --- |
 | `get_policy` | Deployed policy version, lanes, ladder and limits | — |
+| `record_override` | Records a lane the user explicitly asked for, so the gate allows it | `OVERRIDE` with the route |
 | `classify_task` | Class for a new work unit, plus its route | `SMALL`, `MEDIUM`, `HIGH`, `ESCALATE` |
 | `assess_progress` | Next step after a worker cycle | `CONTINUE`, `RETRY`, `VERIFY`, `ESCALATE`, `COMPLETE`\*, `BLOCKED` |
 | `decide_escalation` | Lane change, with the new route computed from the ladder | `KEEP`, `ESCALATE`, `DEESCALATE`, `VERIFY`, `BLOCKED` |
@@ -544,9 +610,11 @@ bin/router-evidence     wrapper for the evidence collector
 bin/router-report       wrapper for the usage report
 jev-mcp/                Python package (uv, Python 3.14)
   src/jev_router/         server.py (MCP), decisions.py, policy.py, schemas.py, jev.py,
-                          evidence.py, usage.py (report), retention.py (log pruning)
+                          evidence.py, usage.py (report), retention.py (log pruning),
+                          gate.py (PreToolUse dispatch gate)
   tests/                  pytest suite
   scripts/smoke_live.py   live end-to-end smoke test
+benchmarks/             router vs. no-router harness (run.sh, grade.sh, summarize.py), tasks and results
 install.sh · uninstall.sh · test.sh · verify-lanes.sh
 ```
 
@@ -560,7 +628,8 @@ install.sh · uninstall.sh · test.sh · verify-lanes.sh
 | `~/.claude/CLAUDE.md` | you + installer | Your content, plus the `claude-code-jev-router` import block |
 | `~/.claude/settings.json` | you + installer | Your settings, plus one SessionStart hook entry |
 | `~/.config/jev/.env` | you | `TYPESAFE_API_KEY`, mode 600 |
-| `~/.local/state/claude-router/decisions.jsonl` | MCP server | Sanitized decision log, pruned to `retention_hours` |
+| `~/.local/state/claude-router/decisions.jsonl` | MCP server, gate | Sanitized decision log (decisions, overrides, jev errors, gate allows and blocks), pruned to `retention_hours` |
+| `~/.local/state/claude-router/gate-<session>.json` | gate | Decisions already used for a dispatch in that session, pruned to `retention_hours` |
 | `<repo>/.git/router-evidence/` | evidence collector | Full check logs per fingerprint, pruned to `retention_hours` |
 | `~/.claude/projects/` | Claude Code | Session transcripts; `router-report` reads these but never writes them |
 
