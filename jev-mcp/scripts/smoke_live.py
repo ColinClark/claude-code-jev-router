@@ -5,7 +5,10 @@ Usage: uv run python scripts/smoke_live.py <path-to-jev-router-mcp>
 
 import asyncio
 import json
+import os
 import sys
+import tempfile
+from pathlib import Path
 
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
@@ -43,7 +46,9 @@ async def call(session, tool, args):
 
 async def main(server: str) -> int:
     failures = []
-    params = StdioServerParameters(command=server, args=[])
+    # Keep smoke-test decisions out of the real decision log.
+    ledger = Path(tempfile.mkdtemp(prefix="router-smoke-")) / "decisions.jsonl"
+    params = StdioServerParameters(command=server, args=[], env={**os.environ, "ROUTER_LEDGER": str(ledger)})
     async with stdio_client(params) as (r, w), ClientSession(r, w) as s:
         await s.initialize()
         tools = {t.name for t in (await s.list_tools()).tools}

@@ -21,6 +21,7 @@ Once installed, it applies to **every project** on your machine unless you turn 
 - [Installation](#installation)
 - [Verifying the install](#verifying-the-install)
 - [Using it day to day](#using-it-day-to-day)
+- [Usage reporting](#usage-reporting)
 - [Turning it off](#turning-it-off)
 - [Customizing](#customizing)
 - [Updating](#updating)
@@ -130,6 +131,7 @@ The installer is **idempotent**, so running it again is safe. It makes only thes
 | 1 | Copies the router and builds its Python venv | `~/.claude/router/` |
 | 2 | Makes sure the Jev key file exists (prompts if missing) | `~/.config/jev/.env` |
 | 3 | Copies the 7 lane agents. It **never overwrites** an agent file it didn't install; it warns and skips instead | `~/.claude/agents/` |
+| 3b | Installs the `/router-report` skill, with the same no-overwrite rule | `~/.claude/skills/router-report/` |
 | 4 | Adds a marked block importing the policy. Your existing content is untouched | `~/.claude/CLAUDE.md` |
 | 5 | Adds a `SessionStart` hook, after writing a timestamped backup (`settings.json.bak-router-*`) | `~/.claude/settings.json` |
 | 6 | Registers the `jev` **stdio MCP server** at user scope | `claude mcp add -s user jev -- ~/.claude/router/jev-mcp/.venv/bin/jev-router-mcp` |
@@ -160,6 +162,7 @@ Inside Claude Code:
 | `/agents` | `implement-small` … `implement-extreme`, `lookup` and `research` under user agents |
 | `/memory` | `~/.claude/CLAUDE.md` imports `~/.claude/router/policy/orchestration.md` |
 | Ask: *"Is the smart router active?"* | Claude quotes the `Smart router: ACTIVE (policy 1.0)` line from the SessionStart hook |
+| `/router-report` | A usage report for the last 24 hours |
 
 From the shell:
 
@@ -213,7 +216,80 @@ the main session:
 
 `collect` prints a JSON packet containing check statuses and exit codes, the changed files, any
 out-of-scope files, and a `stale` flag (set when a check such as a formatter modified the workspace). Full
-logs are written to `.git/router-evidence/<fingerprint>/`.
+logs are written to `.git/router-evidence/<fingerprint>/`. Log folders older than the retention window
+(24 hours by default) are deleted on the next `collect`.
+
+---
+
+## Usage reporting
+
+See which models, lanes and effort levels your work actually ran on, with token counts and an estimated
+cost. Run it inside Claude Code:
+
+```
+/router-report                     # last 24 hours
+/router-report --hours 6           # a different window
+/router-report --project msft      # only projects whose path contains "msft"
+```
+
+Or from the shell:
+
+```bash
+~/.claude/router/bin/router-report                      # text tables, last 24 hours
+~/.claude/router/bin/router-report --hours 168          # the last week
+~/.claude/router/bin/router-report --format markdown    # the format /router-report shows
+~/.claude/router/bin/router-report --format json        # for scripts and dashboards
+~/.claude/router/bin/router-report --top 20             # list more projects (default 10)
+```
+
+### What's in the report
+
+| Section | Shows |
+| --- | --- |
+| Summary | API requests, sessions, input/output/cache tokens, estimated cost, and the share of cost that ran on router lanes |
+| By model | Requests, tokens, effort-level mix and estimated cost per model |
+| By lane / agent | The main session, each router lane agent, and any other subagents (Explore, general-purpose, forks) |
+| Top projects | Usage per project. Each session counts under the directory it started in, and `.claude/worktrees/*` are folded into their repo |
+| Lane/model mismatches | Any router agent that ran on a model other than its configured one (for example, because of an organization override) |
+| Router decisions | Decisions and tasks, Jev versus local-rule decisions, average Jev confidence, starting lanes chosen, and actions (escalations, BLOCKED, …) |
+
+Illustrative output (shortened):
+
+```
+Model usage — last 24h (2026-09-25T10:49:05+00:00 → 2026-09-26T10:49:05+00:00)
+443 API requests across 2 sessions · input 932 · output 577.8k · cache write 2.7M · cache read 102.1M · est. cost $51.01
+
+By lane / agent
+lane               agent            requests  input (incl. cache)  output  effort      est. cost
+-----------------  ---------------  --------  -------------------  ------  ----------  ---------
+—                  main session     310       67.6M                277.8k  medium:310  $33.43
+OPUS_LOW           implement-small  48        6.1M                 41.0k   low:48      $2.87
+not a router lane  general-purpose  55        13.0M                67.9k   medium:55   $5.46
+```
+
+### Where the numbers come from
+
+- **Model usage** is read from Claude Code's own session transcripts (`~/.claude/projects/**/*.jsonl`,
+  including `subagents/`). The router doesn't keep a separate usage log, so there's nothing extra to grow.
+  Only transcripts modified inside the window are opened, and each API request is counted once, even
+  though Claude Code writes one line per content block.
+- **Estimated cost** uses the `pricing` table in `policy/policy.json`: USD per million tokens for input,
+  output, 5-minute and 1-hour cache writes, and cache reads. These are API-equivalent estimates. On a
+  subscription plan they are not your bill; they're a way to compare lanes. Models without a price are
+  counted in tokens and marked `*`. Keep the table current by editing it and re-running `./install.sh`.
+- **Router decisions** come from the decision log (`~/.local/state/claude-router/decisions.jsonl`).
+
+### Keeping logs small
+
+| Log | Size control |
+| --- | --- |
+| Decision log `~/.local/state/claude-router/decisions.jsonl` | Pruned to `retention_hours` (default **24**), at most once an hour by the MCP server and whenever the report runs. It holds one short line per decision, with no task text |
+| Evidence logs `<repo>/.git/router-evidence/<fingerprint>/` | Folders older than `retention_hours` are deleted on each `collect` |
+| Claude Code transcripts `~/.claude/projects/` | Owned by Claude Code, not the router. It deletes them after `cleanupPeriodDays` (30 by default; set it in `~/.claude/settings.json`) |
+
+To keep a longer history, raise `retention_hours` in `policy/policy.json` (for example, `168` for a week),
+then re-run `./install.sh`. The report can only cover decisions still in the log. Model usage can reach as
+far back as Claude Code keeps transcripts.
 
 ---
 
@@ -295,7 +371,7 @@ Edit these files in your clone, then re-run `./install.sh`:
 
 | File | Controls |
 | --- | --- |
-| `policy/policy.json` | Lane → agent/model/effort mapping, the escalation ladder, class descriptions sent to Jev, the confidence threshold, cycle limits, and the Jev endpoint/model/timeout |
+| `policy/policy.json` | Lane → agent/model/effort mapping, the escalation ladder, class descriptions sent to Jev, the confidence threshold, cycle limits, the Jev endpoint/model/timeout, `retention_hours` for the router's logs, and the `pricing` table used by the usage report |
 | `agents/*.md` | Each lane's model, effort, tool allowlist, `maxTurns` and worker instructions |
 | `policy/orchestration.md` | The orchestrator's rules, imported into `~/.claude/CLAUDE.md` |
 
@@ -315,8 +391,9 @@ git pull
 ./install.sh
 ```
 
-Updating refreshes `~/.claude/router/`, the agents it owns, and the MCP registration. It removes agents
-dropped by the new version. Your Jev key and any agents you wrote yourself are left alone.
+Updating refreshes `~/.claude/router/`, the agents and skills it owns, and the MCP registration. It
+removes agents and skills dropped by the new version. Your Jev key and any agents or skills you wrote
+yourself are left alone.
 
 ---
 
@@ -329,13 +406,17 @@ dropped by the new version. Your Jev key and any agents you wrote yourself are l
 
 Uninstall removes:
 - the `jev` MCP registration
-- only the agents the router installed
+- only the agents and skills the router installed
 - the marked import block in `~/.claude/CLAUDE.md`
 - the SessionStart hook entry
+- the router's decision log
 - `~/.claude/router/`
 
-It leaves the rest of your settings, your own agents, and the `settings.json.bak-router-*` backups in
-place.
+It leaves in place:
+- the rest of your settings, and your own agents and skills
+- Claude Code's transcripts
+- `.git/router-evidence/` folders in your repos; delete them with `rm -rf .git/router-evidence`
+- the `settings.json.bak-router-*` backups
 
 ---
 
@@ -349,7 +430,7 @@ place.
 | Layer | Command | What it proves |
 | --- | --- | --- |
 | Lint | `ruff check` and `ruff format --check` (in `test.sh`) | Code style and common bug patterns (ruff rules E, F, W, I, B, UP, S, SIM, RUF) |
-| Unit | `uv run pytest` in `jev-mcp/` | Strict schemas and size limits; hard gates; ladder routing; the rule that failed, unrun or errored checks block COMPLETE; Jev client retries and error mapping; the key never appears in errors; fingerprints change on staged, unstaged and untracked edits |
+| Unit | `uv run pytest` in `jev-mcp/` | Strict schemas and size limits; hard gates; ladder routing; the rule that failed, unrun or errored checks block COMPLETE; Jev client retries and error mapping; the key never appears in errors; fingerprints change on staged, unstaged and untracked edits; the usage report counts each request once, filters by window and project, prices tokens, maps lanes and flags mismatches; retention prunes logs |
 | Live | `./test.sh` | The stdio MCP server starts; real Jev classifications land in sensible lanes; failing evidence can't COMPLETE; identity and fingerprint are echoed back |
 | Installer | `CLAUDE_CONFIG_DIR=/tmp/sb/.claude JEV_ENV_FILE=/tmp/sb/jev.env ./install.sh` | Install, reinstall and uninstall against a scratch config directory, without touching your real one |
 | End to end | `./verify-lanes.sh` | Each agent actually runs on its configured model inside Claude Code |
@@ -402,9 +483,22 @@ override the agent's model or effort. Change that lane's `model:` in `agents/<ag
 `policy/policy.json`), re-run `./install.sh`, then confirm with `./verify-lanes.sh`.
 
 ### Where are decisions logged?
-Decisions are written to `~/.local/state/claude-router/decisions.jsonl`, one line per decision: IDs,
-action or class, route, confidence, and who decided. Task text and evidence bodies are not logged. Use the
-log to tune thresholds and limits.
+Decisions are written to `~/.local/state/claude-router/decisions.jsonl`, one line per decision: tool, IDs,
+action or class, route, confidence, and who decided. Task text and evidence bodies are not logged. The log
+is pruned to `retention_hours` (24 by default). Summarize it with `/router-report`. Set `ROUTER_LEDGER` to
+write it somewhere else.
+
+### `/router-report` shows no usage, or fewer requests than expected
+- The report only reads transcripts modified inside the window, and only requests timestamped inside it.
+  Try `--hours 168`.
+- A non-default config directory needs `CLAUDE_CONFIG_DIR` set when you run the report.
+- A `--project` filter matches against the folded project path (for example `~/Dev/statista/router`).
+- Costs marked `*` include models that have no price in `policy.json`; add a price to include them.
+
+### `/router-report` shows a lane/model mismatch
+A router agent ran on a model other than the one its agent file names. Usually an organization model
+override or cap is the cause, or a project agent with the same name. Check `/agents` in that project, and
+see [the model access entry](#a-lane-fails-with-a-model-access-error).
 
 ---
 
@@ -433,11 +527,14 @@ is never a decision.
 ```
 agents/                 7 lane subagents (model, effort, tool allowlist, worker contract)
 policy/orchestration.md orchestrator rules, imported into ~/.claude/CLAUDE.md
-policy/policy.json      lanes, ladder, classes, limits, Jev endpoint
+policy/policy.json      lanes, ladder, classes, limits, Jev endpoint, retention, pricing
+skills/router-report/   the /router-report skill
 hooks/session-start.sh  prints router ACTIVE/DISABLED into each new session
 bin/router-evidence     wrapper for the evidence collector
+bin/router-report       wrapper for the usage report
 jev-mcp/                Python package (uv, Python 3.14)
-  src/jev_router/         server.py (MCP), decisions.py, policy.py, schemas.py, jev.py, evidence.py
+  src/jev_router/         server.py (MCP), decisions.py, policy.py, schemas.py, jev.py,
+                          evidence.py, usage.py (report), retention.py (log pruning)
   tests/                  pytest suite
   scripts/smoke_live.py   live end-to-end smoke test
 install.sh · uninstall.sh · test.sh · verify-lanes.sh
@@ -449,11 +546,13 @@ install.sh · uninstall.sh · test.sh · verify-lanes.sh
 | --- | --- | --- |
 | `~/.claude/router/` | installer | Installed copy and venv |
 | `~/.claude/agents/<lane>.md` | installer | Lane agents (tracked in `~/.claude/router/.installed-agents`) |
+| `~/.claude/skills/router-report/` | installer | The `/router-report` skill (tracked in `~/.claude/router/.installed-skills`) |
 | `~/.claude/CLAUDE.md` | you + installer | Your content, plus the `claude-code-jev-router` import block |
 | `~/.claude/settings.json` | you + installer | Your settings, plus one SessionStart hook entry |
 | `~/.config/jev/.env` | you | `TYPESAFE_API_KEY`, mode 600 |
-| `~/.local/state/claude-router/decisions.jsonl` | MCP server | Sanitized decision log |
-| `<repo>/.git/router-evidence/` | evidence collector | Full check logs per fingerprint |
+| `~/.local/state/claude-router/decisions.jsonl` | MCP server | Sanitized decision log, pruned to `retention_hours` |
+| `<repo>/.git/router-evidence/` | evidence collector | Full check logs per fingerprint, pruned to `retention_hours` |
+| `~/.claude/projects/` | Claude Code | Session transcripts; `router-report` reads these but never writes them |
 
 ---
 

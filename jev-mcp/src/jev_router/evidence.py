@@ -21,6 +21,17 @@ import subprocess
 import sys
 from pathlib import Path
 
+from . import retention
+from .policy import Policy
+
+
+def _retention_hours() -> float:
+    try:
+        return Policy.load().retention_hours
+    except (OSError, ValueError, KeyError):
+        return 24.0
+
+
 MAX_DIFF_SUMMARY = 2000
 LOG_TAIL_BYTES = 4000
 
@@ -98,6 +109,8 @@ def collect(repo: Path, checks: list[tuple[str, str]], allow: list[str], na: lis
         / before
     )
     log_dir.mkdir(parents=True, exist_ok=True)
+    log_dir.touch()  # refresh mtime so a re-collect on the same fingerprint counts as recent
+    retention.prune_dirs(log_dir.parent, retention.cutoff_for(_retention_hours()), keep=log_dir)
 
     results = [run_check(repo, name, cmd, timeout, log_dir) for name, cmd in checks]
     results += [{"name": name, "status": "NOT_APPLICABLE", "exit_code": None} for name in na]

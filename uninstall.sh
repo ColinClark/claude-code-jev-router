@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Remove the smart router from Claude Code.
-#   ./uninstall.sh                  remove agents, policy import, hook, MCP server and installed files
+#   ./uninstall.sh                  remove agents, skills, policy import, hook, MCP server, decision log
+#                                   and installed files
 #   ./uninstall.sh --purge-credentials   also delete ~/.config/jev/.env
 set -euo pipefail
 
@@ -17,6 +18,15 @@ if [[ -f "$DEST/.installed-agents" ]]; then
     if [[ -n "$name" ]]; then rm -f "$CLAUDE_DIR/agents/$name"; fi
   done < "$DEST/.installed-agents"
 fi
+if [[ -f "$DEST/.installed-skills" ]]; then
+  while read -r name; do
+    if [[ -n "$name" ]]; then rm -rf "${CLAUDE_DIR:?}/skills/$name"; fi
+  done < "$DEST/.installed-skills"
+fi
+# The router's own decision log (Claude Code transcripts are not touched).
+LEDGER="${ROUTER_LEDGER:-$HOME/.local/state/claude-router/decisions.jsonl}"
+rm -f "$LEDGER" "$LEDGER.tmp"
+rmdir "$HOME/.local/state/claude-router" 2>/dev/null || true
 
 CLAUDE_DIR="$CLAUDE_DIR" python3 - <<'PY'
 import json, os, re

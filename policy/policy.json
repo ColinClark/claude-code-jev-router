@@ -28,6 +28,16 @@
     "timeout_seconds": 10,
     "env_file": "~/.config/jev/.env"
   },
+  "retention_hours": 24,
+  "pricing": {
+    "_note": "USD per million tokens, used only for estimates in router-report. Anthropic first-party API rates as of 2026-06-24; cache writes use the standard 1.25x (5m) / 2x (1h) input multipliers. Verify against current pricing and edit as needed.",
+    "claude-opus-5-5":  {"input": 4.00,  "output": 20.00, "cache_write_5m": 5.00,  "cache_write_1h": 8.00,  "cache_read": 0.20},
+    "claude-fable-5-1": {"input": 10.00, "output": 50.00, "cache_write_5m": 12.50, "cache_write_1h": 20.00, "cache_read": 0.25},
+    "claude-sonnet-5":  {"input": 2.00,  "output": 10.00, "cache_write_5m": 2.50,  "cache_write_1h": 4.00,  "cache_read": 0.20},
+    "claude-haiku-4-5": {"input": 1.00,  "output": 5.00,  "cache_write_5m": 1.25,  "cache_write_1h": 2.00,  "cache_read": 0.10},
+    "claude-opus-5":    {"input": 5.00,  "output": 25.00, "cache_write_5m": 6.25,  "cache_write_1h": 10.00, "cache_read": 0.50},
+    "claude-fable-5":   {"input": 10.00, "output": 50.00, "cache_write_5m": 12.50, "cache_write_1h": 20.00, "cache_read": 1.00}
+  },
   "input_limits": {
     "max_text": 2000,
     "max_criteria": 20,

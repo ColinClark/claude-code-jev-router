@@ -12,6 +12,7 @@ import os
 import time
 from pathlib import Path
 
+from . import retention
 from .jev import JevClient, JevError
 from .policy import CLASS_ORDER, Policy, PolicyError, floor_class, hard_gates, raise_class
 from .schemas import ClassifyRequest, CompletionRequest, EscalationRequest, Identity, ProgressRequest
@@ -52,12 +53,21 @@ def _truthy(value) -> bool:
     return bool(value)
 
 
+TOOL_NAMES = {
+    ClassifyRequest: "classify_task",
+    ProgressRequest: "assess_progress",
+    EscalationRequest: "decide_escalation",
+    CompletionRequest: "assess_completion",
+}
+PRUNE_INTERVAL_SECONDS = 3600
+
+
 class Decider:
     def __init__(self, policy: Policy, jev: JevClient, ledger_path: str | os.PathLike | None = None):
         self.policy = policy
         self.jev = jev
-        default_ledger = Path("~/.local/state/claude-router/decisions.jsonl").expanduser()
-        self.ledger_path = Path(ledger_path or os.environ.get("ROUTER_LEDGER") or default_ledger)
+        self.ledger_path = Path(ledger_path) if ledger_path else retention.ledger_path()
+        self._last_prune = 0.0
 
     # ---- tools -----------------------------------------------------------
 
@@ -211,12 +221,12 @@ class Decider:
             "reason": reason[:MAX_REASON],
             "decided_by": decided_by,
         }
-        self._record(result)
+        self._record(result, TOOL_NAMES.get(type(req)))
         return result
 
-    def _record(self, result: dict) -> None:
-        """Append a sanitized decision record (no task text, no evidence body) for later tuning."""
-        entry = {
+    def _record(self, result: dict, tool: str | None) -> None:
+        """Append a sanitized decision record (no task text, no evidence body); prune it to the retention window."""
+        entry = {"tool": tool} | {
             k: result.get(k)
             for k in (
                 "request_id",
@@ -230,11 +240,14 @@ class Decider:
                 "decided_by",
             )
         }
-        entry["ts"] = time.time()
+        entry["ts"] = now = time.time()
         try:
             self.ledger_path.parent.mkdir(parents=True, exist_ok=True)
             with self.ledger_path.open("a") as fh:
                 fh.write(json.dumps(entry) + "\n")
+            if now - self._last_prune >= PRUNE_INTERVAL_SECONDS:
+                self._last_prune = now
+                retention.prune_jsonl(self.ledger_path, retention.cutoff_for(self.policy.retention_hours, now))
         except OSError:
             pass
 

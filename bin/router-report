@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# Model usage and router decision report (see jev-mcp/src/jev_router/usage.py).
+exec "$(cd "$(dirname "$0")/.." && pwd)/jev-mcp/.venv/bin/router-report" "$@"

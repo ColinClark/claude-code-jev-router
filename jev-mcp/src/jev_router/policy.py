@@ -28,6 +28,8 @@ class Policy:
     max_failed_cycles_per_lane: int
     max_cycles_per_unit: int
     jev: dict = field(default_factory=dict)
+    retention_hours: float = 24.0
+    pricing: dict[str, dict] = field(default_factory=dict)
 
     @classmethod
     def load(cls, path: str | os.PathLike | None = None) -> Policy:
@@ -44,6 +46,8 @@ class Policy:
             max_failed_cycles_per_lane=int(limits["max_failed_cycles_per_lane"]),
             max_cycles_per_unit=int(limits["max_cycles_per_unit"]),
             jev=raw.get("jev", {}),
+            retention_hours=float(raw.get("retention_hours", 24)),
+            pricing={k: v for k, v in raw.get("pricing", {}).items() if not k.startswith("_")},
         )
         for lane in policy.ladder:
             if lane not in policy.lanes:

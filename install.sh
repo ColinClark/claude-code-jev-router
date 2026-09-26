@@ -7,7 +7,8 @@
 # What it does (idempotent):
 #   1. Copies this repo to $CLAUDE_ROUTER_HOME (default ~/.claude/router) and builds its venv with uv.
 #   2. Ensures Jev credentials exist in ~/.config/jev/.env (prompts if missing, never echoes the key).
-#   3. Installs the lane subagents into ~/.claude/agents (never overwrites agents it did not install).
+#   3. Installs the lane subagents into ~/.claude/agents and the /router-report skill into ~/.claude/skills
+#      (never overwrites agents or skills it did not install).
 #   4. Imports the orchestration policy from ~/.claude/CLAUDE.md.
 #   5. Registers a SessionStart hook in ~/.claude/settings.json that reports router on/off.
 #   6. Registers the `jev` stdio MCP server at user scope (`claude mcp add -s user`).
@@ -42,12 +43,13 @@ if [[ "$SRC" != "$DEST" ]]; then
   rsync -a --delete \
     --exclude '.git' --exclude '.venv' --exclude '.claude' \
     --exclude '__pycache__' --exclude '.pytest_cache' --exclude '.ruff_cache' \
+    --exclude '.installed-*' \
     "$SRC/" "$DEST/"
 fi
-chmod +x "$DEST/hooks/session-start.sh" "$DEST/bin/router-evidence"
-# Agents and policy reference the default install path; point them at the real one.
+chmod +x "$DEST/hooks/session-start.sh" "$DEST/bin/router-evidence" "$DEST/bin/router-report"
+# Agents, skills and policy reference the default install path; point them at the real one.
 if [[ "$DEST" != "$HOME/.claude/router" ]]; then
-  for f in "$DEST"/agents/*.md "$DEST/policy/orchestration.md"; do
+  for f in "$DEST"/agents/*.md "$DEST"/skills/*/SKILL.md "$DEST/policy/orchestration.md"; do
     DEST="$DEST" python3 -c 'import os,sys; p=sys.argv[1]; t=open(p).read(); open(p,"w").write(t.replace("~/.claude/router", os.environ["DEST"]))' "$f"
   done
 fi
@@ -96,6 +98,28 @@ while read -r old; do
   if [[ -n "$old" && ! -f "$DEST/agents/$old" ]]; then rm -f "$CLAUDE_DIR/agents/$old"; fi
 done < "$MANIFEST"
 mv "$new_manifest" "$MANIFEST"
+
+# 3b. Skills (/router-report) ------------------------------------------------------
+say "Installing skills into $CLAUDE_DIR/skills"
+mkdir -p "$CLAUDE_DIR/skills"
+SKILL_MANIFEST="$DEST/.installed-skills"
+touch "$SKILL_MANIFEST"
+new_manifest="$(mktemp)"
+for dir in "$DEST"/skills/*/; do
+  name="$(basename "$dir")"
+  target="$CLAUDE_DIR/skills/$name"
+  if [[ -e "$target" ]] && ! grep -qxF "$name" "$SKILL_MANIFEST"; then
+    warn "skipping skill $name: $target exists and was not installed by the router"
+    continue
+  fi
+  rm -rf "$target"
+  cp -R "$dir" "$target"
+  echo "$name" >> "$new_manifest"
+done
+while read -r old; do
+  if [[ -n "$old" && ! -d "$DEST/skills/$old" ]]; then rm -rf "${CLAUDE_DIR:?}/skills/$old"; fi
+done < "$SKILL_MANIFEST"
+mv "$new_manifest" "$SKILL_MANIFEST"
 
 # 4 + 5. CLAUDE.md import and SessionStart hook --------------------------------
 say "Wiring policy import and SessionStart hook"
@@ -155,4 +179,5 @@ say "Done. The router is active in every project."
 echo "   Opt out per project:  touch <project>/.claude/router.off"
 echo "   Opt out per shell:    export CLAUDE_ROUTER=off"
 echo "   Override a lane:      add <project>/.claude/agents/<agent-name>.md"
+echo "   Usage report:         /router-report in Claude, or $DEST/bin/router-report --hours 24"
 echo "   Uninstall:            $DEST/uninstall.sh"
