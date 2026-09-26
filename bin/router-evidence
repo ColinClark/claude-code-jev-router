@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# Trusted workspace evidence collector (see jev-mcp/src/jev_router/evidence.py).
+exec "$(cd "$(dirname "$0")/.." && pwd)/jev-mcp/.venv/bin/router-evidence" "$@"

@@ -1,0 +1,37 @@
+{
+  "policy_version": "1.0",
+  "lanes": {
+    "OPUS_LOW":    {"agent": "implement-small",     "model": "claude-opus-5-5",  "effort": "low"},
+    "OPUS_MEDIUM": {"agent": "implement-medium",    "model": "claude-opus-5-5",  "effort": "medium"},
+    "OPUS_HIGH":   {"agent": "implement-high",      "model": "claude-opus-5-5",  "effort": "high"},
+    "FABLE_HIGH":  {"agent": "implement-escalated", "model": "claude-fable-5-1", "effort": "high"},
+    "FABLE_XHIGH": {"agent": "implement-extreme",   "model": "claude-fable-5-1", "effort": "xhigh"},
+    "LOOKUP":      {"agent": "lookup",              "model": "claude-haiku-4-5-20251001", "effort": null},
+    "RESEARCH":    {"agent": "research",            "model": "claude-sonnet-5",  "effort": "medium"}
+  },
+  "ladder": ["OPUS_LOW", "OPUS_MEDIUM", "OPUS_HIGH", "FABLE_HIGH", "FABLE_XHIGH"],
+  "classes": {
+    "SMALL":    {"lane": "OPUS_LOW",    "description": "Small, well-understood change: bounded scope (roughly one module), known pattern, obvious verification."},
+    "MEDIUM":   {"lane": "OPUS_MEDIUM", "description": "Normal feature work: a few files, some design choices, standard tests."},
+    "HIGH":     {"lane": "OPUS_HIGH",   "description": "Complex debugging, cross-cutting edits, concurrency, data migrations, or security-sensitive behavior."},
+    "ESCALATE": {"lane": "FABLE_HIGH",  "description": "Unresolved architecture, competing designs, or difficult failures that stronger models have not resolved."}
+  },
+  "security_sensitive_min_class": "HIGH",
+  "limits": {
+    "confidence_threshold": 0.80,
+    "max_failed_cycles_per_lane": 2,
+    "max_cycles_per_unit": 6
+  },
+  "jev": {
+    "endpoint": "https://api.typesafe.ai/v1/systemone",
+    "model": "jev-latest",
+    "timeout_seconds": 10,
+    "env_file": "~/.config/jev/.env"
+  },
+  "input_limits": {
+    "max_text": 2000,
+    "max_criteria": 20,
+    "max_checks": 40,
+    "max_request_bytes": 16384
+  }
+}
