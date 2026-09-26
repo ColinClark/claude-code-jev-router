@@ -7,15 +7,21 @@ computed here from the policy ladder; Jev only picks an action or class.
 
 from __future__ import annotations
 
-import json
+import contextlib
 import os
-import time
 from pathlib import Path
 
 from . import retention
 from .jev import JevClient, JevError
 from .policy import CLASS_ORDER, Policy, PolicyError, floor_class, hard_gates, raise_class
-from .schemas import ClassifyRequest, CompletionRequest, EscalationRequest, Identity, ProgressRequest
+from .schemas import (
+    ClassifyRequest,
+    CompletionRequest,
+    EscalationRequest,
+    Identity,
+    OverrideRequest,
+    ProgressRequest,
+)
 
 MAX_REASON = 600
 
@@ -58,6 +64,7 @@ TOOL_NAMES = {
     ProgressRequest: "assess_progress",
     EscalationRequest: "decide_escalation",
     CompletionRequest: "assess_completion",
+    OverrideRequest: "record_override",
 }
 PRUNE_INTERVAL_SECONDS = 3600
 
@@ -187,6 +194,25 @@ class Decider:
         action, reason = self._thresholded(answer)
         return self._result(req, fp, "jev", answer.confidence, reason, action=action)
 
+    def override(self, req: OverrideRequest) -> dict:
+        """Record a lane the user explicitly asked for, so the dispatch gate allows it and the report shows it."""
+        self._check_policy(req)
+        self._check_lane(req.lane)
+        return self._result(
+            req, None, "user_override", 1.0, req.reason, action="OVERRIDE", route=self.policy.route(req.lane)
+        )
+
+    def record_error(self, req: Identity, code: str) -> None:
+        entry = {
+            "tool": TOOL_NAMES.get(type(req)),
+            "request_id": req.request_id,
+            "task_id": req.task_id,
+            "policy_version": req.policy_version,
+            "error": code,
+            "decided_by": "error",
+        }
+        self._append(entry)
+
     # ---- helpers ---------------------------------------------------------
 
     def _thresholded(self, answer) -> tuple[str, str]:
@@ -240,16 +266,14 @@ class Decider:
                 "decided_by",
             )
         }
-        entry["ts"] = now = time.time()
-        try:
-            self.ledger_path.parent.mkdir(parents=True, exist_ok=True)
-            with self.ledger_path.open("a") as fh:
-                fh.write(json.dumps(entry) + "\n")
-            if now - self._last_prune >= PRUNE_INTERVAL_SECONDS:
-                self._last_prune = now
+        self._append(entry)
+
+    def _append(self, entry: dict) -> None:
+        now = retention.append_entry(self.ledger_path, entry)
+        if now - self._last_prune >= PRUNE_INTERVAL_SECONDS:
+            self._last_prune = now
+            with contextlib.suppress(OSError):
                 retention.prune_jsonl(self.ledger_path, retention.cutoff_for(self.policy.retention_hours, now))
-        except OSError:
-            pass
 
 
 def error_result(payload: dict, code: str, reason: str) -> dict:
@@ -277,4 +301,8 @@ def run(model_cls, handler, payload: dict) -> dict:
     except PolicyError as exc:
         return error_result(payload, "INVALID_REQUEST", str(exc))
     except JevError as exc:
+        # Logged so the dispatch gate can fall back to local routing while Jev is unavailable.
+        owner = getattr(handler, "__self__", None)
+        if isinstance(owner, Decider):
+            owner.record_error(req, exc.code)
         return error_result(payload, exc.code, exc.message)

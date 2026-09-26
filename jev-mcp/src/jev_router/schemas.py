@@ -103,3 +103,8 @@ class EscalationRequest(Identity):
 class CompletionRequest(Identity):
     residual_question: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=600)]
     evidence: Evidence
+
+
+class OverrideRequest(Identity):
+    lane: Lane
+    reason: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=300)]

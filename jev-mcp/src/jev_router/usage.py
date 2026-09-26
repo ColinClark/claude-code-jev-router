@@ -376,23 +376,20 @@ def build_report(
 
 
 def decision_summary(ledger: Path, since: float, until: float, policy: Policy) -> dict:
-    retention.prune_jsonl(ledger, retention.cutoff_for(policy.retention_hours, until))
-    entries = []
-    try:
-        for line in ledger.read_text().splitlines():
-            try:
-                entry = json.loads(line)
-            except ValueError:
-                continue
-            if since <= float(entry.get("ts", 0)) <= until:
-                entries.append(entry)
-    except FileNotFoundError:
-        pass
+    # Retention is relative to the real clock, never to the report window's end.
+    retention.prune_jsonl(ledger, retention.cutoff_for(policy.retention_hours))
+    everything = [e for e in retention.read_entries(ledger, since) if float(e.get("ts", 0)) <= until]
+    gate = [e for e in everything if e.get("tool") == "dispatch_gate"]
+    errors = [e for e in everything if e.get("error")]
+    entries = [e for e in everything if e not in gate and e not in errors]
     confidences = [e["confidence"] for e in entries if e.get("decided_by") == "jev" and e.get("confidence") is not None]
     lanes = Counter((e.get("route") or {}).get("lane") for e in entries if e.get("tool") == "classify_task")
     return {
         "decisions": len(entries),
         "tasks": len({e.get("task_id") for e in entries}),
+        "dispatch_gate": dict(Counter(e.get("action") for e in gate).most_common()),
+        "overrides": sum(1 for e in entries if e.get("tool") == "record_override"),
+        "jev_errors": dict(Counter(e["error"] for e in errors).most_common()),
         "by_tool": dict(Counter(e.get("tool") or "unknown" for e in entries).most_common()),
         "actions": dict(Counter(e["action"] for e in entries if e.get("action")).most_common()),
         "classes": dict(Counter(e["class"] for e in entries if e.get("class")).most_common()),
@@ -476,16 +473,25 @@ def render(report: dict, markdown: bool = False) -> str:
 
     d = report["router_decisions"]
     parts += ["", f"{sub}Router decisions"]
+
+    def fmt(counts: dict) -> str:
+        return ", ".join(f"{k} {v}" for k, v in counts.items()) or "none"
+
     if d["decisions"]:
-        fmt = lambda c: ", ".join(f"{k} {v}" for k, v in c.items()) or "none"  # noqa: E731
         parts += [
-            f"- {d['decisions']} decisions for {d['tasks']} tasks · decided by: {fmt(d['decided_by'])}"
+            f"- {d['decisions']} decisions for {d['tasks']} units · decided by: {fmt(d['decided_by'])}"
             + (f" · avg Jev confidence {d['avg_jev_confidence']}" if d["avg_jev_confidence"] is not None else ""),
             f"- initial lanes: {fmt(d['initial_lanes'])}",
             f"- actions: {fmt(d['actions'])}",
         ]
+        if d["overrides"]:
+            parts.append(f"- user overrides: {d['overrides']}")
     else:
         parts.append("- no router decisions in this window")
+    if d["dispatch_gate"]:
+        parts.append(f"- dispatch gate: {fmt(d['dispatch_gate'])}")
+    if d["jev_errors"]:
+        parts.append(f"- jev errors: {fmt(d['jev_errors'])}")
     parts.append(f"- decision log keeps {d['retention_hours']:g}h (policy.json `retention_hours`)")
     if t["unpriced_requests"]:
         parts.append("\n* includes requests on models with no price in policy.json; their cost is not counted.")

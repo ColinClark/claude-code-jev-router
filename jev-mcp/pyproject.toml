@@ -13,6 +13,7 @@ dependencies = [
 jev-router-mcp = "jev_router.server:main"
 router-evidence = "jev_router.evidence:main"
 router-report = "jev_router.usage:main"
+router-gate = "jev_router.gate:main"
 
 [dependency-groups]
 dev = ["pytest>=8", "ruff>=0.6"]

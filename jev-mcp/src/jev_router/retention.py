@@ -19,6 +19,34 @@ def ledger_path() -> Path:
     return Path(os.environ.get("ROUTER_LEDGER") or DEFAULT_LEDGER)
 
 
+def append_entry(path: Path, entry: dict) -> float:
+    """Append one timestamped JSON line to a log. Failures are swallowed: logging must never break routing."""
+    now = time.time()
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        with path.open("a") as fh:
+            fh.write(json.dumps({**entry, "ts": now}) + "\n")
+    except OSError:
+        pass
+    return now
+
+
+def read_entries(path: Path, since: float = 0.0) -> list[dict]:
+    try:
+        lines = path.read_text().splitlines()
+    except FileNotFoundError:
+        return []
+    out = []
+    for line in lines:
+        try:
+            entry = json.loads(line)
+            if float(entry.get("ts", 0)) >= since:
+                out.append(entry)
+        except (ValueError, TypeError, AttributeError):
+            continue
+    return out
+
+
 def prune_jsonl(path: Path, cutoff: float) -> int:
     """Rewrite a JSONL log keeping only entries with `ts` >= cutoff. Returns the number of entries dropped."""
     try:
@@ -51,6 +79,19 @@ def prune_dirs(parent: Path, cutoff: float, keep: Path | None = None) -> int:
         if child.is_dir() and child != keep and child.stat().st_mtime < cutoff:
             shutil.rmtree(child, ignore_errors=True)
             removed += 1
+    return removed
+
+
+def prune_files(parent: Path, pattern: str, cutoff: float) -> int:
+    """Delete files matching pattern in parent last modified before cutoff."""
+    removed = 0
+    for path in parent.glob(pattern):
+        try:
+            if path.is_file() and path.stat().st_mtime < cutoff:
+                path.unlink()
+                removed += 1
+        except OSError:
+            continue
     return removed
 
 

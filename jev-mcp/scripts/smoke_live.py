@@ -15,7 +15,14 @@ from mcp.client.stdio import stdio_client
 
 ID = {"schema_version": "1.0", "task_id": "smoke", "policy_version": "1.0"}
 LADDER = ["OPUS_LOW", "OPUS_MEDIUM", "OPUS_HIGH", "FABLE_HIGH", "FABLE_XHIGH"]
-EXPECTED_TOOLS = {"get_policy", "classify_task", "assess_progress", "decide_escalation", "assess_completion"}
+EXPECTED_TOOLS = {
+    "get_policy",
+    "classify_task",
+    "assess_progress",
+    "decide_escalation",
+    "assess_completion",
+    "record_override",
+}
 
 TASKS = [
     # (task, signals, lanes the result may land in)
@@ -51,6 +58,7 @@ async def main(server: str) -> int:
     params = StdioServerParameters(command=server, args=[], env={**os.environ, "ROUTER_LEDGER": str(ledger)})
     async with stdio_client(params) as (r, w), ClientSession(r, w) as s:
         await s.initialize()
+        ID["policy_version"] = (await call(s, "get_policy", {}))["policy_version"]
         tools = {t.name for t in (await s.list_tools()).tools}
         print("tools:", sorted(tools))
         if tools != EXPECTED_TOOLS:

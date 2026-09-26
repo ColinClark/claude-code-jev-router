@@ -8,7 +8,7 @@ from jev_router.policy import Policy, hard_gates
 from jev_router.schemas import ClassifyRequest, CompletionRequest, EscalationRequest, Evidence, ProgressRequest
 
 LADDER = ["OPUS_LOW", "OPUS_MEDIUM", "OPUS_HIGH", "FABLE_HIGH", "FABLE_XHIGH"]
-ID = {"schema_version": "1.0", "request_id": "r1", "task_id": "t1", "policy_version": "1.0"}
+ID = {"schema_version": "1.0", "request_id": "r1", "task_id": "t1", "policy_version": Policy.load().version}
 
 
 class FakeJev:

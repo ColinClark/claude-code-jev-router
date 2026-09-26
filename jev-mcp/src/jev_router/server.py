@@ -11,7 +11,14 @@ from mcp.server.mcpserver import MCPServer
 from .decisions import Decider, run
 from .jev import JevClient
 from .policy import Policy
-from .schemas import ClassifyRequest, CompletionRequest, EscalationRequest, Evidence, ProgressRequest
+from .schemas import (
+    ClassifyRequest,
+    CompletionRequest,
+    EscalationRequest,
+    Evidence,
+    OverrideRequest,
+    ProgressRequest,
+)
 
 mcp = MCPServer(
     "jev",
@@ -161,6 +168,31 @@ def assess_completion(
         evidence=evidence.model_dump(mode="json"),
     )
     return run(CompletionRequest, decider().completion, payload)
+
+
+@mcp.tool()
+def record_override(
+    schema_version: Literal["1.0"],
+    request_id: str,
+    task_id: str,
+    policy_version: str,
+    lane: str,
+    reason: str,
+) -> dict:
+    """Record a lane the USER explicitly asked for (e.g. "use implement-high for this"), so it may be dispatched.
+
+    Only for explicit user instructions; never to bypass a classification you disagree with. Logged and shown
+    in /router-report as a user override.
+    """
+    payload = dict(
+        schema_version=schema_version,
+        request_id=request_id,
+        task_id=task_id,
+        policy_version=policy_version,
+        lane=lane,
+        reason=reason,
+    )
+    return run(OverrideRequest, decider().override, payload)
 
 
 def main() -> None:

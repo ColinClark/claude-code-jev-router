@@ -28,11 +28,11 @@ LEDGER="${ROUTER_LEDGER:-$HOME/.local/state/claude-router/decisions.jsonl}"
 rm -f "$LEDGER" "$LEDGER.tmp"
 rmdir "$HOME/.local/state/claude-router" 2>/dev/null || true
 
-CLAUDE_DIR="$CLAUDE_DIR" python3 - <<'PY'
+DEST="$DEST" CLAUDE_DIR="$CLAUDE_DIR" python3 - <<'PY'
 import json, os, re
 from pathlib import Path
 
-claude = Path(os.environ["CLAUDE_DIR"])
+claude, dest = Path(os.environ["CLAUDE_DIR"]), os.environ["DEST"]
 md = claude / "CLAUDE.md"
 if md.exists():
     text = re.sub(r"\n*<!-- claude-code-jev-router:begin -->.*?<!-- claude-code-jev-router:end -->\n?", "\n",
@@ -42,11 +42,15 @@ if md.exists():
 sp = claude / "settings.json"
 if sp.exists():
     s = json.loads(sp.read_text())
-    groups = s.get("hooks", {}).get("SessionStart", [])
-    groups[:] = [g for g in groups if not any("session-start.sh" in h.get("command", "") and "router" in h.get("command", "")
-                                              for h in g.get("hooks", []))]
-    if not groups:
-        s.get("hooks", {}).pop("SessionStart", None)
+
+    def router_owned(cmd):
+        return cmd.startswith(dest + "/") or "router/hooks/session-start.sh" in cmd or "/bin/router-gate" in cmd
+
+    hooks = s.get("hooks", {})
+    for event in list(hooks):
+        hooks[event] = [g for g in hooks[event] if not any(router_owned(h.get("command", "")) for h in g.get("hooks", []))]
+        if not hooks[event]:
+            del hooks[event]
     if s.get("hooks") == {}:
         s.pop("hooks")
     sp.write_text(json.dumps(s, indent=2) + "\n")

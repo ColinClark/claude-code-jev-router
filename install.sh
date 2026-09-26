@@ -10,7 +10,8 @@
 #   3. Installs the lane subagents into ~/.claude/agents and the /router-report skill into ~/.claude/skills
 #      (never overwrites agents or skills it did not install).
 #   4. Imports the orchestration policy from ~/.claude/CLAUDE.md.
-#   5. Registers a SessionStart hook in ~/.claude/settings.json that reports router on/off.
+#   5. Registers hooks in ~/.claude/settings.json: SessionStart (router on/off + session id) and a
+#      PreToolUse dispatch gate on the Agent tool (implement-* agents need a routing decision).
 #   6. Registers the `jev` stdio MCP server at user scope (`claude mcp add -s user`).
 #   7. Verifies the MCP server starts and lists its tools.
 set -euo pipefail
@@ -122,7 +123,7 @@ done < "$SKILL_MANIFEST"
 mv "$new_manifest" "$SKILL_MANIFEST"
 
 # 4 + 5. CLAUDE.md import and SessionStart hook --------------------------------
-say "Wiring policy import and SessionStart hook"
+say "Wiring policy import, SessionStart hook and dispatch gate"
 DEST="$DEST" CLAUDE_DIR="$CLAUDE_DIR" SET_MODEL="$SET_MODEL" python3 - <<'PY'
 import json, os, re, shutil, time
 from pathlib import Path
@@ -140,11 +141,19 @@ settings_path = claude / "settings.json"
 settings = json.loads(settings_path.read_text()) if settings_path.exists() else {}
 if settings_path.exists():
     shutil.copy2(settings_path, settings_path.with_suffix(f".json.bak-router-{int(time.time())}"))
-hook_cmd = str(dest / "hooks" / "session-start.sh")
-groups = settings.setdefault("hooks", {}).setdefault("SessionStart", [])
-groups[:] = [g for g in groups if not any("session-start.sh" in h.get("command", "") and "router" in h.get("command", "")
-                                          for h in g.get("hooks", []))]
-groups.append({"hooks": [{"type": "command", "command": hook_cmd}]})
+def router_owned(cmd: str) -> bool:
+    return cmd.startswith(str(dest) + "/") or "router/hooks/session-start.sh" in cmd or "/bin/router-gate" in cmd
+
+hooks = settings.setdefault("hooks", {})
+for event in list(hooks):  # drop hooks from any earlier router install, whatever the event
+    hooks[event] = [g for g in hooks[event] if not any(router_owned(h.get("command", "")) for h in g.get("hooks", []))]
+    if not hooks[event]:
+        del hooks[event]
+hooks.setdefault("SessionStart", []).append(
+    {"hooks": [{"type": "command", "command": str(dest / "hooks" / "session-start.sh")}]})
+# Dispatch gate: implement-* agents only run with a routing decision ("Task" is the Agent tool's older name).
+hooks.setdefault("PreToolUse", []).append(
+    {"matcher": "Agent|Task", "hooks": [{"type": "command", "command": str(dest / "jev-mcp/.venv/bin/router-gate")}]})
 if os.environ.get("SET_MODEL") == "1":
     settings["model"] = "claude-opus-5-5"
 settings_path.write_text(json.dumps(settings, indent=2) + "\n")
