@@ -41,8 +41,15 @@ your request
     │
     ▼
 orchestrator (your main Claude session)
-    │  writes acceptance criteria, allowed paths and check commands, then records a baseline
-    │  splits the work into units and asks jev.classify_task for every unit
+    │  Step 0: jev.classify_task on the whole task, then picks a mode
+    │
+    ├── lightweight mode (one unit, route ≤ OPUS_MEDIUM, not security-sensitive, not long-running)
+    │       implements it directly, runs the repo's checks at the end;
+    │       two failed attempts → full mode with escalation
+    │
+    └── full mode (multi-part, long-running or security-sensitive work)
+            writes acceptance criteria, allowed paths and check commands, records a baseline,
+            splits into units and classifies every unit (first attempts capped at OPUS_MEDIUM)
     │
     ├──► dispatch gate (PreToolUse hook) ──► blocks any implement-* dispatch without a routing decision
     │
@@ -72,10 +79,19 @@ next unit, retry, escalate, verify, or a final report with lanes used, checks, e
 | `LOOKUP` | `lookup` | Haiku 4.5 | Read-only symbol and file lookup |
 | `RESEARCH` | `research` | Sonnet 5 / medium | Read-only multi-file investigation |
 
-Escalation follows the ladder `OPUS_LOW → OPUS_MEDIUM → OPUS_HIGH → FABLE_HIGH → FABLE_XHIGH` and needs
-evidence at each step. Default limits: 2 failed cycles per lane, 6 cycles per unit, and a Jev confidence
-threshold of 0.80. When the hard part is solved, the next unit is classified afresh and can drop back to a
-cheaper lane.
+Escalation follows the ladder `OPUS_LOW → OPUS_MEDIUM → OPUS_HIGH → FABLE_HIGH → FABLE_XHIGH` and is
+**evidence-driven**:
+- **Capped first attempts.** A unit's first attempt runs at most on OPUS_MEDIUM, even when Jev predicts
+  HIGH or ESCALATE (`first_attempt_max_lane` in `policy.json`). OPUS_HIGH and the Fable lanes are reached
+  only through `decide_escalation` after verification has shown a real failure.
+- **Security exception.** Security-sensitive units start at OPUS_HIGH.
+- **Limits.** 2 failed cycles per lane, 6 cycles per unit, and a Jev confidence threshold of 0.80. Below the
+  threshold, a classification hedges *down* to the cheaper of Jev's top two classes.
+- **De-escalation.** When the hard part is solved, the next unit is classified afresh and can drop back to
+  a cheaper lane.
+
+The [benchmarks](#benchmark-router-vs-no-router) show why: routing on predicted difficulty sent units that
+Opus at medium effort solves to Fable, at 2–4× the cost.
 
 **What doesn't get routed:** questions, explanations, planning, reviews, and trivial one-file edits. The
 main session handles these directly, so they cost no subagent overhead.
@@ -194,7 +210,7 @@ Inside Claude Code:
 | `/mcp` | `jev` is listed as connected, with 5 tools |
 | `/agents` | `implement-small` … `implement-extreme`, `lookup` and `research` under user agents |
 | `/memory` | `~/.claude/CLAUDE.md` imports `~/.claude/router/policy/orchestration.md` |
-| Ask: *"Is the smart router active?"* | Claude quotes the `Smart router: ACTIVE (policy 1.0)` line from the SessionStart hook |
+| Ask: *"Is the smart router active?"* | Claude quotes the `Smart router: ACTIVE (policy 1.6)` line from the SessionStart hook, along with the router session id |
 | `/router-report` | A usage report for the last 24 hours |
 
 From the shell:
@@ -214,18 +230,28 @@ those with `/agents`.
 ## Using it day to day
 
 Work as usual; there's no new command to learn. For any request that changes code beyond a trivial edit,
-the main session:
+the main session starts with **Step 0**: it classifies the whole task with Jev and sizes the process to
+the result.
+
+**Lightweight mode** covers most everyday tasks: one coherent unit routed at OPUS_MEDIUM or lower, not
+security-sensitive, and not long-running. The main session implements the change itself, runs the repo's
+checks at the end, and reports. There's no worker dispatch, evidence baseline or per-unit contract. If the
+checks still fail after two honest attempts, it switches to full mode and escalates.
+
+**Full mode** is for multi-part, long-running or security-sensitive work. The main session:
 
 1. **Writes a contract:** acceptance criteria (`A1`, `A2`, …), allowed paths, and the repo's own check
    commands (tests, typecheck, lint, build). It records a baseline, so failures that existed before the
    change stay visible.
 2. **Splits and routes the work.** It splits the task into the smallest useful units, keeping parts that
-   belong in different lanes (such as scaffolding versus concurrency-safe persistence) separate. It calls
-   `jev.classify_task` for **every** unit and dispatches exactly the agent in the returned route. The
-   [dispatch gate](#the-dispatch-gate) enforces this.
-3. **Collects evidence itself** with `router-evidence` after every worker cycle, instead of trusting the
-   worker's report.
-4. **Decides:** continue, retry (only with a new hypothesis), verify, escalate, complete, or blocked.
+   belong in different lanes separate. It calls `jev.classify_task` for **every** unit and dispatches
+   exactly the agent in the returned route; first attempts are capped at OPUS_MEDIUM. The
+   [dispatch gate](#the-dispatch-gate) enforces this. Each worker runs in a fresh context, which is what
+   makes long tasks cheaper than one ever-growing session.
+3. **Waits for every worker** and collects evidence itself with `router-evidence` after each cycle, instead
+   of trusting the worker's report.
+4. **Decides:** continue, retry (only with a new hypothesis), verify, escalate (only after a verified
+   failure), complete, or blocked.
 5. **Reports:** the lanes used and why, the changed files, each check with its exit code, the evidence
    fingerprint, and any limitations.
 
@@ -242,9 +268,9 @@ the main session:
 ### The dispatch gate
 
 Prompt instructions alone don't guarantee routing. In an early test the orchestrator skipped Jev,
-judging the class "obvious", and sent a concurrency-heavy task to one MEDIUM worker. Jev would have split
-it and routed the locking part to HIGH. So a `PreToolUse` hook (`router-gate`) runs before every Agent
-tool call:
+judging the class "obvious", and routed the work on its own judgment. So a `PreToolUse` hook
+(`router-gate`) runs before every Agent tool call. It only governs *dispatches*: lightweight mode, where
+the main session does the work itself, involves none.
 
 - **Gated agents:** a dispatch to an implementation lane (`implement-small` … `implement-extreme`) is
   allowed only if this session has an unused routing decision in the decision log that names that agent.
@@ -315,6 +341,7 @@ Illustrative output (shortened):
 ```
 Model usage — last 24h (2026-09-25T10:49:05+00:00 → 2026-09-26T10:49:05+00:00)
 443 API requests across 2 sessions · input 932 · output 577.8k · cache write 2.7M · cache read 102.1M · est. cost $51.01
+Output tokens: 424 requests as recorded, 19 requests reconciled with Claude Code session totals.
 
 By lane / agent
 lane               agent            requests  input (incl. cache)  output  effort      est. cost
@@ -440,7 +467,7 @@ Edit these files in your clone, then re-run `./install.sh`:
 
 | File | Controls |
 | --- | --- |
-| `policy/policy.json` | Lane → agent/model/effort mapping, the escalation ladder, class descriptions sent to Jev, the confidence threshold, cycle limits, the Jev endpoint/model/timeout, `retention_hours` for the router's logs, and the `pricing` table used by the usage report |
+| `policy/policy.json` | Lane → agent/model/effort mapping, the escalation ladder, `first_attempt_max_lane` (the cap on a unit's first attempt; default `OPUS_MEDIUM`, remove it to route by predicted class), class descriptions sent to Jev, the confidence threshold, cycle limits, the Jev endpoint/model/timeout, `retention_hours` for the router's logs, and the `pricing` table used by the usage report |
 | `agents/*.md` | Each lane's model, effort, tool allowlist, `maxTurns` and worker instructions |
 | `policy/orchestration.md` | The orchestrator's rules, imported into `~/.claude/CLAUDE.md` |
 
@@ -621,7 +648,7 @@ jev-mcp/                Python package (uv, Python 3.14)
   tests/                  pytest suite
   scripts/smoke_live.py   live end-to-end smoke test
 benchmarks/             router vs. no-router harness (run.sh, grade.sh, summarize.py), tasks and results
-install.sh · uninstall.sh · test.sh · verify-lanes.sh
+install.sh · uninstall.sh · test.sh · verify-lanes.sh · CHANGELOG.md (policy history)
 ```
 
 ### Files outside the repo
@@ -648,8 +675,16 @@ install.sh · uninstall.sh · test.sh · verify-lanes.sh
 - **Hard gates come before Jev.** Failed, unrun or errored checks; unsatisfied or unknown criteria;
   out-of-scope diffs; and known failures are all evaluated locally. Jev is only asked about what's left
   after that.
-- **Low-confidence classification** hedges to the stronger of Jev's two top candidates, not blindly one
-  class up. Security-sensitive work is floored at HIGH. `FABLE_XHIGH` is never a first classification.
+- **Escalate on evidence, not prediction.** First attempts are capped at OPUS_MEDIUM; stronger lanes need a
+  verified failure. Low-confidence classifications hedge *down* to the cheaper of Jev's top two classes,
+  because with a verification loop a too-low guess costs one retry, while a too-high guess costs a
+  stronger lane on every run. Security-sensitive work is floored at HIGH. `FABLE_XHIGH` is never a first
+  classification.
+- **Size the process to the task.** Single-unit tasks run in lightweight mode, with no dispatch and checks
+  at the end. Full orchestration, with contracts, workers in fresh contexts and evidence, is reserved for
+  multi-part, long-running or security-sensitive work.
+- **Wait for workers.** The orchestrator never ends its turn with a worker still running. In headless
+  sessions, that would end the session and lose the verification and the report.
 - **Retries require a new hypothesis.** Repeating an unchanged failed attempt uses up budget without adding
   evidence.
 - **Credentials:** the MCP server process is the only thing that reads the key, from `TYPESAFE_API_KEY` or
