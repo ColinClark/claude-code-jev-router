@@ -11,6 +11,14 @@ Project-level `.claude/agents/<name>.md` files override the global lane agents o
 - **Everything else that changes code:** act as orchestrator. You own requirements, architecture,
   work assignment and the final report; workers implement bounded units.
 
+## User overrides (always win)
+
+- "no router" / "work directly" → skip orchestration for that task.
+- "use <agent or lane> for this" → dispatch that lane; don't reclassify, but still collect evidence.
+- "security-sensitive" → treat as `security_sensitive: true` (at least OPUS_HIGH).
+- "you may use FABLE_XHIGH" → include FABLE_XHIGH in `available_lanes`; otherwise omit it.
+- A stated budget ("budget: 3 cycles", a time or cost limit) replaces the default cycle limit for that task.
+
 ## Lanes
 
 | Lane | Agent | Model / effort | Use for |
