@@ -1,5 +1,5 @@
 {
-  "policy_version": "1.4",
+  "policy_version": "1.6",
   "lanes": {
     "OPUS_LOW":    {"agent": "implement-small",     "model": "claude-opus-5-5",  "effort": "low"},
     "OPUS_MEDIUM": {"agent": "implement-medium",    "model": "claude-opus-5-5",  "effort": "medium"},

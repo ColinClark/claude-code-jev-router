@@ -8,8 +8,26 @@ Project-level `.claude/agents/<name>.md` files override the global lane agents o
 
 - **Questions, explanations, planning, reviews:** answer directly. No routing.
 - **Trivial edits** (one file, a few lines, obvious and already verified by you): do them directly.
-- **Everything else that changes code:** act as orchestrator. You own requirements, architecture,
-  work assignment and the final report; workers implement bounded units.
+- **Everything else that changes code:** start with Step 0 below. You own requirements, architecture,
+  work assignment and the final report.
+
+## Step 0: size the process to the task (always first)
+
+Load the jev tools (see step 2) and call `mcp__jev__classify_task` once for the **whole task**
+(`task_id "<session id>:whole"`). Then pick a mode. Benchmarks show orchestration overhead is only repaid on
+large, multi-part work; on single-unit tasks it just adds cost.
+
+- **Lightweight mode:** use it when the whole task is one coherent unit, the returned route is OPUS_MEDIUM
+  or lower, it is not security-sensitive, and it will not be long-running (roughly: a few files, not a
+  multi-module system). Implement it **yourself in this session**; do not dispatch a worker, because
+  delegating to the same or a cheaper Opus lane only re-reads context you already have. Skip the evidence
+  baseline, per-unit contracts and `assess_*` calls, and run the repo's checks once at the end. If the
+  checks still fail after two honest attempts, switch to full mode: call `decide_escalation` and dispatch
+  the escalated lane with a contract.
+- **Full mode:** use it for everything else: several units that belong in different lanes, long-running
+  work (many modules or a large codebase, where one session's context would grow large), or
+  security-sensitive work. Follow the required cycle below. Here workers pay for themselves through
+  context isolation: each unit runs in a fresh context instead of one ever-growing session.
 
 ## User overrides (always win)
 
@@ -62,13 +80,13 @@ sent to Fable at four times the cost. Security-sensitive units are the exception
      `implement-*` dispatch without an unused routing decision for that agent in this session. Each decision
      allows one dispatch. To change lanes afterwards use `decide_escalation`; for a user-named lane use
      `record_override`.
-   - **Work directly when delegation adds nothing.** If the whole task is a single unit whose route is
-     OPUS_MEDIUM and you are running on Opus 5.5 at medium effort yourself, implement it in this session
-     instead of dispatching: it is the same model and effort, and a worker would only re-read the context.
-     Still classify it (for the log), collect evidence and verify. If it then fails verification twice, call
-     `decide_escalation` and dispatch the escalated lane.
    - Pass the worker: task ID, criteria, allowed paths, baseline, prior hypotheses and the check commands.
      One implementation writer per checkout at a time; lookup/research may run in parallel and are not gated.
+   - **Wait for every dispatched worker's result before you continue or finish.** Never end your turn while
+     a worker is still running. In headless (`claude -p`) sessions, ending the turn ends the session: the
+     worker's result, your verification and the final report are lost. If the Agent tool runs workers in the
+     background, keep working on independent verification or wait for the completion notification; do not
+     write the final report until every worker has returned and its evidence has been collected.
 3. **Evidence.** After each worker returns, never trust its report alone. Run
    `~/.claude/router/bin/router-evidence collect --check NAME=CMD ... --allow 'GLOB' ...` yourself. Add
    `criteria` (SATISFIED / UNSATISFIED / UNKNOWN with an evidence_ref) and, if you did not pass `--allow`,
